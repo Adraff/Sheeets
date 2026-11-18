@@ -11,7 +11,7 @@ $zipPath = Join-Path $dist "$name.zip"
 New-Item -ItemType Directory -Force $dist | Out-Null
 if (Test-Path $zipPath) { Remove-Item $zipPath }
 
-$files = @("Instalar.bat", "Desinstalar.bat", "Instalar.command", "Desinstalar.command", "README.md", "README.es.md") +
+$files = @("Instalar.bat", "Desinstalar.bat", "Instalar.command", "Desinstalar.command", "README.md", "README.es.md", "LICENSE") +
     (Get-ChildItem (Join-Path $root "installer") -File | ForEach-Object { "installer\" + $_.Name }) +
     (Get-ChildItem (Join-Path $root "docs") -File | ForEach-Object { "docs\" + $_.Name }) +
     (Get-ChildItem (Join-Path $root "plugin") -File -Recurse | ForEach-Object { $_.FullName.Substring($root.Length + 1) })

@@ -2,138 +2,300 @@
 <html lang="es-AR">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
 <title>Sheeets</title>
 <style>
-  :root { --bg: #323232; --fg: #e6e6e6; --muted: #9a9a9a; --field: #262626; --line: #4a4a4a; --accent: #378ef0; --err: #f27474; --ok: #6fcf97; --warn: #f2c94c; }
-  :root.light { --bg: #f0f0f0; --fg: #222; --muted: #666; --field: #fff; --line: #ccc; --err: #c62828; --ok: #2e7d32; --warn: #a15c00; }
+  :root {
+    --bg: #323232; --fg: #e6e6e6; --strong: #ffffff; --muted: #8b8b8b; --faint: #6a6a6a;
+    --field: #1f1f1f; --line: #6f6f6f; --card: #383838; --tab-off: #262626; --dim: rgba(0, 0, 0, .62);
+    --accent: #378ef0; --err: #f27474; --ok: #3fb444; --warn: #f2c94c; --tool: #6b6b6b; --tool-fg: #262626;
+    --scroll: #5a5a5a; --scroll-hover: #7a7a7a;
+  }
+  :root.light {
+    --fg: #222; --strong: #000; --muted: #6e6e6e; --faint: #8a8a8a;
+    --field: #fff; --line: #9a9a9a; --card: #f6f6f6; --tab-off: #d6d6d6; --dim: rgba(0, 0, 0, .35);
+    --err: #c62828; --ok: #2e7d32; --warn: #a15c00; --tool: #b8b8b8; --tool-fg: #222; --scroll: #b4b4b4; --scroll-hover: #949494;
+  }
+  /* Illustrator's UI typeface; the files come from Illustrator's own install (see loadUiFont in main.js). */
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  body { margin: 0; padding: 8px; background: var(--bg); color: var(--fg); font: 12px/1.4 system-ui, "Segoe UI", sans-serif; }
-  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 6px; }
-  h3 { font-size: 13px; margin: 0 0 8px; }
-  input { width: 100%; padding: 4px 6px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 3px; font: inherit; }
-  input.good { border-color: var(--ok); } input.bad { border-color: var(--err); }
-  select { width: 100%; padding: 3px 4px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 3px; font: inherit; }
-  input[type=checkbox], input[type=color] { width: auto; padding: 0; vertical-align: middle; }
-  input[type=color] { height: 20px; width: 36px; }
-  label { display: block; color: var(--muted); margin: 6px 0 2px; }
-  label.inline { display: flex; align-items: center; gap: 4px; margin-top: 8px; color: var(--fg); }
-  label > input, label > select { margin-top: 2px; }
-  .row { display: flex; gap: 6px; margin-top: 6px; }
-  .row label { flex: 1; margin-top: 0; }
-  button { flex: 1; padding: 5px 8px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 3px; font: inherit; cursor: pointer; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  button:disabled { opacity: .5; cursor: default; }
-  button.wide { display: block; width: 100%; margin-top: 6px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #linkBtn.primary { text-align: center; }
-  #linkBtn.linked { font-weight: 600; }
-  .sheet-list { margin-top: 4px; border: 1px solid var(--line); border-radius: 3px; max-height: 200px; overflow: auto; }
-  .sheet-item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+  html, body { height: 100%; }
+  /* scrollbars like Illustrator's panels: thin rounded thumb, no arrows, no track */
+  ::-webkit-scrollbar { width: 10px; height: 10px; background: transparent; }
+  ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--scroll); border: 2px solid transparent; border-radius: 5px; background-clip: padding-box; min-height: 24px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scroll-hover); border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-button { display: none; }
+  body { margin: 0; display: flex; flex-direction: column; background: var(--bg); color: var(--fg);
+         font: 12px/1.35 "Adobe Clean", "AdobeCleanUI", system-ui, "Segoe UI", sans-serif; overflow: hidden; }
+  .ico { display: inline-block; width: 14px; height: 14px; flex: 0 0 auto; background: currentColor; -webkit-mask: center / contain no-repeat; }
+  .i-logo { -webkit-mask-image: url(img/sheeets.svg); } .i-edit { -webkit-mask-image: url(img/edit.svg); } .i-paste { -webkit-mask-image: url(img/paste.svg); }
+  .i-reload { -webkit-mask-image: url(img/reload.svg); } .i-cross { -webkit-mask-image: url(img/cross.svg); } .i-more { -webkit-mask-image: url(img/more.svg); }
+  .i-up { -webkit-mask-image: url(img/up.svg); } .i-down { -webkit-mask-image: url(img/down.svg); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  button:disabled { opacity: .45; cursor: default; }
+  input, select { font: inherit; color: var(--fg); }
+
+  /* ---- top bar ---- */
+  .top { display: flex; align-items: center; gap: 6px; padding: 4px 6px 0; min-height: 20px; }
+  #sel { flex: 1; min-width: 0; color: var(--faint); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #sel.warn { color: var(--warn); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; padding: 2px 4px; background: none; border: 0; color: var(--muted); }
+  .icon-btn:hover { color: var(--strong); }
+  #moreBtn .ico { width: 16px; height: 6px; }
+
+  /* ---- views ---- */
+  main { flex: 1; overflow-y: auto; padding: 0 6px 10px; }
+  .view[hidden] { display: none; }
+  h2 { margin: 10px 0 5px; font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); }
+  .empty { display: flex; align-items: center; justify-content: center; min-height: max(160px, calc(100vh - 150px)); color: var(--muted); font-size: 13px; }
+  .empty .center { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .empty .link { font-size: 11px; }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 10px; border-radius: 3px;
+         border: 1px solid var(--line); background: transparent; color: var(--strong); font-size: 14px; white-space: nowrap; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.ghost-accent { border-color: var(--accent); color: var(--accent); }
+  .btn:not(:disabled):hover { filter: brightness(1.12); }
+  .btn.block { width: 100%; }
+
+  /* link button: big blue "Enlazar", or the linked file's name with the logo on the left */
+  #linkBtn { width: 100%; height: 34px; padding: 0; overflow: hidden; }
+  #linkBtn .logo { display: flex; align-items: center; justify-content: center; width: 34px; height: 100%; flex: 0 0 auto; }
+  #linkBtn .logo .ico { width: 22px; height: 18px; }
+  #linkBtn.primary { justify-content: center; }
+  #linkBtn.primary .logo { width: auto; }
+  #linkBtn.linked { justify-content: flex-start; border: 1.5px solid var(--accent); background: transparent; }
+  #linkBtn.linked .logo { background: var(--accent); color: #fff; }
+  #linkBtn .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #linkBtn.linked .label { flex: 1; padding: 0 8px; color: var(--accent); font-weight: 700; text-align: center; }
+
+  #sheetBtn { width: 100%; font-weight: 700; }
+  .sheet-list { margin-top: 3px; border: 1px solid var(--line); border-radius: 3px; max-height: 200px; overflow: auto; background: var(--field); }
+  .sheet-item { display: block; width: 100%; padding: 6px 10px; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--tab-off); }
   .sheet-item:last-child { border-bottom: 0; }
-  .sheet-item.current { font-weight: 600; }
-  .muted { color: var(--muted); }
-  .bad { color: var(--err); } .good { color: var(--ok); } .busy { color: var(--muted); }
-  #status { position: sticky; bottom: 0; margin: 10px -8px -8px; padding: 6px 8px; background: var(--bg); border-top: 1px solid var(--line); white-space: pre-line; }
+  .sheet-item:hover { background: var(--accent); color: #fff; }
+  .sheet-item.current { font-weight: 700; }
+  #fetched { margin-top: 4px; text-align: right; font-style: italic; color: var(--faint); font-size: 11px; }
+
+  /* variables */
+  .var { margin-top: 6px; }
+  .var-name { margin-bottom: 3px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .var-field { display: flex; align-items: stretch; min-height: 34px; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .sample { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; padding: 2px 8px; color: var(--strong);
+            font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+  .sample.approx::after { content: "·" attr(data-approx); margin-left: 6px; color: var(--muted); font: 10px "Adobe Clean", system-ui, sans-serif; letter-spacing: 0; }
+  .var-bar { width: 2px; margin: 4px 0; flex: 0 0 auto; }
+  .var-edit { width: 34px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; margin-left: 2px; border: 0; background: var(--tool); color: var(--tool-fg); }
+  .var-edit.open { background: var(--accent); color: #fff; }
+  .var-edit .ico { width: 15px; height: 15px; }
+  .warn { color: var(--warn); margin-top: 3px; }
+  .warn:empty { display: none; }
+
+  /* variable editor */
+  .editor { margin-top: 4px; padding: 6px 8px 8px; background: var(--card); border-radius: 3px; }
+  .editor label { display: block; margin: 6px 0 2px; color: var(--muted); font-size: 11px; }
+  .editor label.inline { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--fg); font-size: 12px; }
+  .editor input, .editor select { width: 100%; height: 24px; padding: 2px 6px; margin-top: 2px; background: var(--field); border: 1px solid transparent; border-radius: 2px; }
+  .editor input:focus, .editor select:focus, #linkInput:focus { outline: none; border-color: var(--accent); }
+  .editor input[type=checkbox] { width: auto; height: auto; margin: 0; }
+  .editor input[type=color] { width: 36px; height: 20px; padding: 0; margin: 0; }
+  .editor .btn { height: 26px; font-size: 12px; margin-top: 8px; }
+  /* font family search: CEP doesn't show <datalist> popups, so the list is drawn by the panel */
+  .combo { position: relative; }
+  .combo-list { position: absolute; z-index: 5; left: 0; right: 0; top: 100%; max-height: 180px; overflow-y: auto; margin-top: 1px;
+                background: var(--field); border: 1px solid var(--line); border-radius: 2px; box-shadow: 0 3px 8px rgba(0,0,0,.4); }
+  .combo-item { padding: 4px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .combo-item.active, .combo-item:hover { background: var(--accent); color: #fff; }
+
+  /* line template: a one-line rich field; each {token} shows its variable's format */
+  #tpl { min-height: 34px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--strong); font-size: 14px;
+         line-height: 20px; white-space: pre; overflow-x: auto; overflow-y: hidden; outline: none; }
+  #tpl:focus { border-color: var(--accent); }
+  #tpl:empty::before { content: attr(data-placeholder); color: var(--faint); }
+  #tpl .tok { white-space: pre; }
+  #chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  #chips button { height: 19px; padding: 0 8px; background: none; border: 1.5px solid; border-radius: 2px; color: var(--strong); font-size: 12px; line-height: 1; }
+
+  .actions { display: flex; gap: 8px; margin-top: 22px; }
+  .actions .btn { flex: 1; min-width: 0; padding: 0 6px; font-size: 13px; }
+  .actions #secondBtn { flex: 1.25; }
+  .actions .btn span { overflow: hidden; text-overflow: ellipsis; }
+  .actions #updAll { flex: 0 0 34px; padding: 0; }
+  #updAll .ico { width: 17px; height: 17px; }
+
+  #confirm { margin-top: 10px; padding: 8px; border: 1px solid var(--warn); border-radius: 3px; color: var(--warn); }
+  #confirm .actions { margin-top: 8px; }
+
+  /* table view */
+  #docName { display: block; width: 100%; padding: 0; border: 0; background: none; color: var(--accent); font-size: 17px; font-weight: 700;
+             text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #sheetName { color: var(--strong); font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .limits { display: flex; gap: 9px; }
+  .spin { flex: 1; min-width: 0; display: flex; align-items: center; height: 34px; padding: 0 6px 0 10px; border: 1px solid var(--line); border-radius: 3px; }
+  .spin:focus-within { border-color: var(--accent); }
+  .spin label { flex: 0 1 auto; color: var(--muted); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .spin input { flex: 1; min-width: 26px; width: 100%; padding: 0 4px; background: none; border: 0; color: var(--strong); font-size: 14px; text-align: center; outline: none; }
+  .spin input::placeholder { color: var(--strong); opacity: 1; }
+  .arrows { display: flex; flex-direction: column; gap: 2px; }
+  .arrows button { display: flex; padding: 0; border: 0; background: none; color: var(--strong); }
+  .arrows .ico { width: 8px; height: 6px; }
+  #count { margin: -2px 0 5px; color: var(--faint); font-size: 11px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; border: 1px solid var(--line); }
+  th, td { padding: 4px 8px; border: 1px solid var(--line); text-align: left; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+  th { color: var(--muted); font-weight: 400; }
+
+  /* status */
+  #status { flex: 0 0 auto; padding: 5px 8px; border-top: 1px solid var(--tab-off); white-space: pre-line; max-height: 30%; overflow-y: auto; }
   #status:empty { display: none; }
   #status.error { color: var(--err); } #status.ok { color: var(--ok); } #status.warn { color: var(--warn); }
-  #chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-  #chips button { flex: 0 0 auto; padding: 1px 6px; font-size: 11px; }
-  #confirm { margin-top: 8px; padding: 8px; border: 1px solid var(--warn); border-radius: 3px; color: var(--warn); }
-  .var { padding: 6px 0; border-bottom: 1px solid var(--line); }
-  .var-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-  .var-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .var-head button { flex: 0 0 auto; padding: 2px 8px; }
-  .sample { margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
-  .sample.approx::after { content: "  · " attr(data-approx); color: var(--muted); font: 11px system-ui, "Segoe UI", sans-serif; letter-spacing: 0; }
-  .warn { color: var(--warn); }
-  .warn:empty { display: none; }
-  .editor { margin-top: 6px; padding: 6px 8px 8px; border: 1px solid var(--line); border-radius: 3px; }
-  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { padding: 3px 6px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
-  th { color: var(--muted); font-weight: 600; }
-  .overlay { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(0, 0, 0, .55); }
-  .dialog { width: 100%; max-width: 380px; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
-  .input-row { display: flex; gap: 6px; }
-  .input-row button { flex: 0 0 auto; }
-  #linkMsg { min-height: 1.4em; margin-top: 8px; }
-  .top { display: flex; align-items: flex-start; gap: 8px; }
-  .top #sel { flex: 1; }
-  .lang { display: flex; flex: 0 0 auto; }
-  .lang button { flex: 0 0 auto; padding: 1px 6px; font-size: 10px; border-radius: 0; }
-  .lang button:first-child { border-radius: 3px 0 0 3px; } .lang button:last-child { border-radius: 0 3px 3px 0; border-left: 0; }
-  .lang button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-  #loading { z-index: 20; flex-direction: column; gap: 10px; color: #fff; }
+
+  /* bottom tabs */
+  .tabs { flex: 0 0 auto; display: flex; height: 28px; }
+  .tabs button { flex: 1; border: 0; background: var(--tab-off); color: var(--faint); }
+  .tabs button.active { background: var(--bg); color: var(--fg); }
+
+  /* overlays: link dialog, menu, loading */
+  .overlay { position: fixed; inset: 0; z-index: 10; padding: 34px 8px 8px; background: var(--dim); }
+  .overlay > .close { position: absolute; top: 12px; right: 10px; color: var(--muted); }
+  .overlay > .close .ico { width: 13px; height: 13px; }
+  .card { padding: 12px 14px 14px; background: var(--card); border-radius: 3px; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+  .card h2:first-child { margin-top: 0; }
+  .paste-field { display: flex; align-items: center; height: 26px; background: var(--field); border-radius: 2px; }
+  #linkInput { flex: 1; min-width: 0; height: 100%; padding: 0 8px; background: none; border: 1px solid transparent; border-radius: 2px; }
+  #pasteBtn .ico { width: 11px; height: 15px; }
+  #linkVerify { margin-top: 12px; }
+  #linkMsg { min-height: 1.4em; margin-top: 10px; font-weight: 700; }
+  #linkMsg.good { color: var(--ok); } #linkMsg.bad { color: var(--err); } #linkMsg.busy { color: var(--muted); font-weight: 400; }
+  .seg { display: flex; gap: 6px; }
+  .seg button { flex: 1; height: 24px; border: 0; border-radius: 1px; background: var(--field); color: var(--strong); }
+  .seg button.active { background: var(--accent); color: #fff; }
+  .credit { display: flex; justify-content: space-between; gap: 8px; color: var(--strong); }
+  .link { padding: 0; border: 0; background: none; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #version { color: var(--strong); }
+  #checkUpd { width: 100%; height: 24px; margin-top: 8px; border: 0; border-radius: 1px; background: var(--field); color: var(--strong); }
+  #menu .card h2 { margin-top: 14px; }
+  #menu .card h2:first-child { margin-top: 0; }
+
+  #loading { z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #fff; }
   .spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
 </style>
 </head>
 <body>
+
   <div class="top">
-    <div id="sel" class="muted"></div>
-    <div class="lang" role="group" aria-label="Idioma / Language"><button data-lang="es">ES</button><button data-lang="en">EN</button></div>
+    <div id="sel"></div>
+    <button id="moreBtn" class="icon-btn" title="Más opciones" data-i18n-title="Más opciones"><i class="ico i-more"></i></button>
   </div>
 
-  <h2 data-i18n="Hoja de datos">Hoja de datos</h2>
-  <button id="linkBtn" class="wide primary">Enlazar</button>
-  <button id="sheetBtn" class="wide" hidden></button>
-  <div id="sheetList" class="sheet-list" hidden></div>
-  <div id="fetched" class="muted"></div>
+  <main>
+    <!-- ===== Parámetros ===== -->
+    <section id="viewParams" class="view">
+      <h2 data-i18n="Enlace con Google Sheets">Enlace con Google Sheets</h2>
+      <button id="linkBtn" class="btn primary"><span class="logo"><i class="ico i-logo"></i></span><span class="label">Enlazar</span></button>
+      <div id="waiting" class="empty">
+        <div class="center">
+          <div data-i18n="Esperando enlace…">Esperando enlace…</div>
+          <!-- with nothing linked in the panel, the document's existing boxes can still be updated -->
+          <button id="updAllEmpty" class="link" data-i18n="Actualizar todas las cajas">Actualizar todas las cajas</button>
+        </div>
+      </div>
 
-  <h2 data-i18n="Variables">Variables</h2>
-  <div id="vars"></div>
+      <div id="linked">
+        <h2 data-i18n="Hoja">Hoja</h2>
+        <button id="sheetBtn" class="btn"></button>
+        <div id="sheetList" class="sheet-list" hidden></div>
+        <div id="fetched"></div>
 
-  <h2 data-i18n="Caja">Caja</h2>
-  <label for="tpl" data-i18n="Plantilla (se repite una línea por fila)">Plantilla (se repite una línea por fila)</label>
-  <input id="tpl" placeholder="{Fecha} {Nombre}">
-  <div id="chips"></div>
-  <div class="row">
-    <label><span data-i18n="Desde fila">Desde fila</span><input id="from" placeholder="2" inputmode="numeric"></label>
-    <label><span data-i18n="Hasta fila">Hasta fila</span><input id="to" placeholder="todas" data-i18n-ph="todas" inputmode="numeric"></label>
-  </div>
-  <div class="row">
-    <button id="newBox" class="primary" data-i18n="Nueva caja">Nueva caja</button>
-    <button id="convert" data-i18n="Convertir selección">Convertir selección</button>
-  </div>
-  <div class="row">
-    <button id="updBox" data-i18n="Actualizar caja">Actualizar caja</button>
-    <button id="updAll" data-i18n="Actualizar todas">Actualizar todas</button>
-  </div>
-  <div class="row">
-    <button id="toggle">Ver plantilla</button>
-  </div>
-  <div id="confirm" hidden>
-    <div id="confirmMsg"></div>
-    <div class="row">
-      <button id="confirmYes" class="primary" data-i18n="Reemplazar">Reemplazar</button>
-      <button id="confirmNo" data-i18n="Cancelar">Cancelar</button>
-    </div>
-  </div>
+        <h2 data-i18n="Variables">Variables</h2>
+        <div id="vars"></div>
 
-  <h2 data-i18n="Vista previa de la hoja">Vista previa de la hoja</h2>
-  <div id="count" class="muted"></div>
-  <div class="scroll"><table id="preview"></table></div>
+        <h2 data-i18n="Formato de línea">Formato de línea</h2>
+        <div id="tpl" contenteditable="true" spellcheck="false" role="textbox" aria-label="Formato de línea" data-placeholder="{Nombre} cumple el {Fecha}" data-i18n-ph="{Nombre} cumple el {Fecha}"></div>
+        <div id="chips"></div>
+
+        <div class="actions">
+          <button id="mainBtn" class="btn primary"><span></span></button>
+          <button id="secondBtn" class="btn" hidden><span></span></button>
+          <button id="updAll" class="btn ghost-accent" title="Actualizar todas" data-i18n-title="Actualizar todas"><i class="ico i-reload"></i></button>
+        </div>
+        <div id="confirm" hidden>
+          <div id="confirmMsg"></div>
+          <div class="actions">
+            <button id="confirmYes" class="btn primary" data-i18n="Reemplazar">Reemplazar</button>
+            <button id="confirmNo" class="btn" data-i18n="Cancelar">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Tabla ===== -->
+    <section id="viewTable" class="view" hidden>
+      <div id="tableEmpty" class="empty" data-i18n="Esperando enlace…">Esperando enlace…</div>
+      <div id="tableBody">
+        <h2 data-i18n="Documento">Documento</h2>
+        <button id="docName"></button>
+        <h2 data-i18n="Hoja">Hoja</h2>
+        <div id="sheetName"></div>
+        <h2 data-i18n="Límites">Límites</h2>
+        <div class="limits">
+          <div class="spin">
+            <label for="from" data-i18n="Desde la fila">Desde la fila</label>
+            <input id="from" placeholder="2" inputmode="numeric" autocomplete="off">
+            <div class="arrows"><button data-step="from:1" tabindex="-1"><i class="ico i-up"></i></button><button data-step="from:-1" tabindex="-1"><i class="ico i-down"></i></button></div>
+          </div>
+          <div class="spin">
+            <label for="to" data-i18n="Hasta la fila">Hasta la fila</label>
+            <input id="to" placeholder="Todas" data-i18n-ph="Todas" inputmode="numeric" autocomplete="off">
+            <div class="arrows"><button data-step="to:1" tabindex="-1"><i class="ico i-up"></i></button><button data-step="to:-1" tabindex="-1"><i class="ico i-down"></i></button></div>
+          </div>
+        </div>
+        <h2 data-i18n="Vista previa de la hoja">Vista previa de la hoja</h2>
+        <div id="count"></div>
+        <div class="scroll"><table id="preview"></table></div>
+      </div>
+    </section>
+  </main>
 
   <div id="status" role="status" aria-live="polite"></div>
 
+  <nav class="tabs">
+    <button data-view="viewParams" class="active" data-i18n="Parámetros">Parámetros</button>
+    <button data-view="viewTable" data-i18n="Tabla">Tabla</button>
+  </nav>
+
+  <!-- ===== link dialog ===== -->
   <div id="linkDlg" class="overlay" hidden>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="linkTitle">
-      <h3 id="linkTitle" data-i18n="Enlazar hoja de Google Sheets">Enlazar hoja de Google Sheets</h3>
-      <div class="input-row">
+    <button id="linkCancel" class="icon-btn close" title="Cerrar" data-i18n-title="Cerrar"><i class="ico i-cross"></i></button>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="linkTitle">
+      <h2 id="linkTitle" data-i18n="Enlace de Google Sheets">Enlace de Google Sheets</h2>
+      <div class="paste-field">
         <input id="linkInput" placeholder="Pegá el enlace de la hoja" data-i18n-ph="Pegá el enlace de la hoja" aria-label="Google Sheets">
-        <button id="pasteBtn" data-i18n="Pegar">Pegar</button>
+        <button id="pasteBtn" class="icon-btn" title="Pegar" data-i18n-title="Pegar"><i class="ico i-paste"></i></button>
       </div>
+      <button id="linkVerify" class="btn primary block" data-i18n="Verificar">Verificar</button>
       <div id="linkMsg" aria-live="polite"></div>
-      <div class="row">
-        <button id="linkCancel" data-i18n="Cancelar">Cancelar</button>
-        <button id="linkVerify" class="primary" data-i18n="Verificar">Verificar</button>
-      </div>
+    </div>
+  </div>
+
+  <!-- ===== menu ===== -->
+  <div id="menu" class="overlay" hidden>
+    <button id="menuClose" class="icon-btn close" title="Cerrar" data-i18n-title="Cerrar"><i class="ico i-cross"></i></button>
+    <div class="card" role="dialog" aria-modal="true">
+      <h2 data-i18n="Idioma">Idioma</h2>
+      <div class="seg" role="group"><button data-lang="es" data-i18n="Español">Español</button><button data-lang="en" data-i18n="Inglés">Inglés</button></div>
+      <h2 data-i18n="Créditos">Créditos</h2>
+      <div class="credit"><span>Adraff</span><button class="link" data-url="https://github.com/Adraff/Sheeets">www.github.com/Adraff/Sheeets</button></div>
+      <h2 data-i18n="Versión">Versión</h2>
+      <div id="version"></div>
+      <button id="checkUpd" data-url="https://github.com/Adraff/Sheeets/releases" data-i18n="Buscar actualizaciones">Buscar actualizaciones</button>
     </div>
   </div>
 
   <div id="loading" class="overlay" hidden aria-live="polite"><div class="spinner"></div><div id="loadingText"></div></div>
-  <datalist id="fontFamilies"></datalist>
 
   <script src="js/i18n.js"></script>
   <script src="js/csv.js"></script>

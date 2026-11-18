@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.sheeets.linkedtext" ExtensionBundleVersion="0.2.0" ExtensionBundleName="Sheeets" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.sheeets.linkedtext" ExtensionBundleVersion="0.3.0" ExtensionBundleName="Sheeets" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.sheeets.linkedtext.panel" Version="0.2.0"/>
+    <Extension Id="com.sheeets.linkedtext.panel" Version="0.3.0"/>
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
@@ -35,6 +35,13 @@
             <Size><Height>520</Height><Width>320</Width></Size>
             <MinSize><Height>200</Height><Width>220</Width></MinSize>
           </Geometry>
+          <!-- icon of the collapsed panel; Dark* are used on Illustrator's dark themes (generated from img/sheeets.svg) -->
+          <Icons>
+            <Icon Type="Normal">./img/panel.png</Icon>
+            <Icon Type="RollOver">./img/panel-hover.png</Icon>
+            <Icon Type="DarkNormal">./img/panel-dark.png</Icon>
+            <Icon Type="DarkRollOver">./img/panel-dark-hover.png</Icon>
+          </Icons>
         </UI>
       </DispatchInfo>
     </Extension>

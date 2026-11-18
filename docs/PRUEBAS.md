@@ -67,8 +67,6 @@ Cada prueba dice qué hacer y qué tiene que pasar. Marcá ✔ o ✘.
 ## E. Plantilla / vista previa y ediciones a mano
 | # | Acción | Resultado esperado |
 |---|---|---|
-| E1 | Seleccionar la caja → **Ver plantilla** | La caja muestra `{Fecha} {Nombre}` en Bold/Light |
-| E2 | **Ver datos** | Vuelven las filas. Ajustes y formato intactos |
 | E3 | Editar a mano un nombre en la caja | El panel dice "· editada a mano" |
 | E4 | Actualizar caja → Cancelar | "No se cambió nada." El texto sigue editado |
 | E5 | Actualizar caja → Reemplazar | Vuelve el texto de la hoja. El próximo Actualizar no pregunta |
@@ -95,4 +93,16 @@ Cada prueba dice qué hacer y qué tiene que pasar. Marcá ✔ o ✘.
 | G8 | Hoja con columnas vacías y filas vacías | No aparecen como variables ni en la vista previa, y no hay aviso amarillo por ellas |
 | G9 | Editar una variable → escribir "Ari" en Tipografía | La lista sugiere familias. Al elegir "Arial" aparecen sus estilos |
 | G10 | Seleccionar una caja y después otra / Actualizar | Aparece un overlay "Cargando…" / "Actualizando…" mientras tanto |
-| G11 | Botones **ES / EN** | Toda la interfaz cambia de idioma. Con Illustrator en inglés, el panel arranca en inglés |
+| G11 | Menú **⋯** → Español / Inglés | Toda la interfaz cambia de idioma. Con Illustrator en inglés, el panel arranca en inglés |
+
+## H. Diseño nuevo (0.3.0)
+| # | Acción | Resultado esperado |
+|---|---|---|
+| H1 | Colapsar el panel a ícono | Se ve el logo de Sheeets (gris en tema oscuro, más oscuro en tema claro) |
+| H2 | Sin hoja enlazada | Botón azul **Enlazar** con el logo y "Esperando enlace…" en el centro |
+| H3 | Enlazar una hoja | El botón muestra el nombre del archivo centrado; aparecen Hoja, Variables y Formato de línea |
+| H4 | Lápiz de una variable → escribir "ari" en Tipografía | Se despliega la lista de familias; con flechas y Enter (o clic) se elige una |
+| H5 | Sin texto seleccionado / con texto común seleccionado | "Convertir selección" no aparece / aparece al lado de "Nueva caja" |
+| H6 | Pestaña **Tabla** → flechas de Límites | "Desde" no baja de 2; "Hasta" pasa a **Todas** después de la última fila |
+| H7 | Menú **⋯** | Idioma, créditos, versión 0.3.0 y Buscar actualizaciones (abre la página de Releases) |
+| H8 | Panel corto con mucho contenido | Barra de scroll fina y redondeada, como las de Illustrator |

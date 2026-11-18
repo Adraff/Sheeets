@@ -24,23 +24,34 @@ No hace falta instalar nada más ni tener permisos de administrador.
 
 ---
 
-## Instalar
+## Instalar (paso a paso)
 
-### Windows
-1. Descomprimí el `.zip`.
-2. Cerrá Illustrator.
-3. Hacé doble clic en **`Instalar.bat`**.
-4. Abrí Illustrator → **Ventana → Extensiones → Sheeets**.
+### Paso 1: descargar
+1. Entrá a la página de **[Releases](https://github.com/Adraff/Sheeets/releases/latest)**.
+2. En **Assets**, descargá **`Sheeets-<versión>.zip`**. No uses "Source code": ese archivo es para desarrolladores.
+3. Descomprimilo:
+   - Windows: clic derecho sobre el `.zip` → **Extraer todo…** → **Extraer**.
+   - macOS: doble clic sobre el `.zip`.
 
-Si Windows muestra "Windows protegió su PC": **Más información → Ejecutar de todas formas**.
+### Paso 2: instalar en Windows
+1. Cerrá Illustrator.
+2. En la carpeta que descomprimiste, hacé doble clic en **`Instalar.bat`**.
+3. Si aparece "Windows protegió su PC": **Más información → Ejecutar de todas formas**.
+4. Se abre una ventana negra con el avance. Cuando dice **"Listo. Sheeets … quedó instalada."**, apretá Enter para cerrarla.
 
-### macOS
-1. Descomprimí el `.zip`.
-2. Cerrá Illustrator.
-3. Hacé **clic derecho → Abrir** sobre **`Instalar.command`** y confirmá **Abrir**. Si hacés doble clic, macOS puede bloquearlo porque el archivo no está firmado.
-4. Abrí Illustrator → **Ventana → Extensiones → Sheeets**.
+### Paso 2: instalar en macOS
+1. Cerrá Illustrator.
+2. En la carpeta que descomprimiste, hacé **clic derecho → Abrir** sobre **`Instalar.command`** y confirmá **Abrir**. Con doble clic, macOS puede bloquearlo porque el archivo no está firmado.
+3. Se abre la Terminal con el avance. Cuando dice **"Listo. Sheeets … quedó instalada."**, apretá Enter.
 
 Si macOS sigue sin dejarlo abrir: abrí **Terminal**, escribí `bash ` (con espacio), arrastrá `Instalar.command` a la ventana y apretá Enter.
+
+### Paso 3: abrir el panel
+1. Abrí Illustrator.
+2. Andá a **Ventana → Extensiones → Sheeets**.
+3. Podés acoplar el panel junto a los demás. Colapsado, se ve con el logo de Sheeets.
+
+Si el panel no aparece o aparece vacío, mirá [Solución de problemas](#solución-de-problemas).
 
 ### Qué hace el instalador
 - Copia el plugin a tu carpeta de usuario:
@@ -57,15 +68,19 @@ Adobe solo carga extensiones sin firma si `PlayerDebugMode` está activo. Firmar
 
 ## Usar
 
-El panel usa el idioma de Illustrator (español o inglés). Con los botones **ES / EN** de arriba lo cambiás.
+El panel tiene dos pestañas abajo:
+- **Parámetros:** enlace, hoja, variables, formato de línea y botones.
+- **Tabla:** documento, hoja, límites (desde/hasta qué fila) y vista previa de la hoja.
+
+El menú **⋯** de arriba a la derecha tiene el **idioma** (español o inglés; por defecto, el de Illustrator), los créditos, la versión y **Buscar actualizaciones**.
 
 ### 1. Enlazar una hoja
 Cada caja tiene **su propio enlace**: una caja puede usar una hoja y otra caja otra distinta.
 
 1. En Google Sheets: **Compartir → Cualquier persona con el enlace → Lector**, y copiá el enlace.
-2. En el panel, apretá **Enlazar**. Se abre una ventana: pegá el enlace con **Pegar** o con Ctrl+V (Cmd+V en Mac).
-3. El enlace se verifica solo. Si es correcto, aparece ✓ con el nombre del archivo y la ventana se cierra. Si no, aparece ✗ con el motivo y la ventana queda abierta.
-4. El botón **Enlazar** pasa a mostrar el nombre del archivo: tocalo para cambiar el enlace. Debajo, **Hoja: …** muestra la pestaña elegida: tocalo para ver todas las pestañas del archivo y elegir otra.
+2. En el panel, apretá **Enlazar**. Se abre una ventana: pegá el enlace con el ícono de pegar o con Ctrl+V (Cmd+V en Mac).
+3. El enlace se verifica solo (o con **Verificar**). Si es correcto, aparece **Verificado** y la ventana se cierra. Si no, aparece el motivo y la ventana queda abierta.
+4. El botón pasa a mostrar el nombre del archivo: tocalo para cambiar el enlace. Debajo, **Hoja** muestra la pestaña elegida: tocala para ver todas las pestañas del archivo y elegir otra.
 
 La **fila 1** de la hoja son los nombres de las variables. Las columnas y filas vacías se ignoran. Los datos se guardan dentro del `.ai` y viajan con el archivo.
 
@@ -75,16 +90,16 @@ La **fila 1** de la hoja son los nombres de las variables. Las columnas y filas 
 ### 2. Dar formato a las variables (opcional)
 Por defecto no se aplica **ningún** formato: el texto sale con la configuración de Illustrator, o con la del texto que convertiste. Si cambiás el tamaño o la fuente de toda la caja en Illustrator, se mantiene al actualizar.
 
-Si querés que una columna se vea distinta, apretá **Editar** en esa variable:
+Cada variable muestra su primer valor con el formato que tiene. Si querés que una columna se vea distinta, apretá el **lápiz** de esa variable:
 - **Atributos directos**: tipografía (escribí para buscar), estilo (Bold, Light…), tamaño, color, interletra y desplazamiento de línea base. Un campo vacío deja ese atributo como el de la caja.
 - **Estilo de carácter**: usa un estilo de carácter del documento.
 - **Alias**: otro nombre para usar en la plantilla, por ejemplo `{F}` en vez de `{Fecha}`.
 - **Quitar formato**: vuelve a dejar la variable como el resto de la caja.
 
 ### 3. Crear una caja
-1. Escribí la **Plantilla**, por ejemplo `{Fecha} {Nombre}`. Los botones con los nombres de las variables las insertan en el cursor. Entre variables podés poner texto fijo: `{Fecha} – {Nombre}`.
-2. Elegí el rango: **Desde fila** (2 = primera fila de datos) y **Hasta fila** (vacío = todas).
-3. Apretá **Nueva caja** para crearla en el centro de la vista, o seleccioná un texto existente y apretá **Convertir selección**.
+1. Escribí el **Formato de línea**, por ejemplo `{Fecha} {Nombre}`. Los botones de colores con los nombres de las variables las insertan en el cursor. Entre variables podés poner texto fijo: `{Fecha} – {Nombre}`.
+2. En la pestaña **Tabla**, elegí los **Límites**: **Desde la fila** (2 = primera fila de datos) y **Hasta la fila** (**Todas** = hasta el final). Las flechas suben y bajan el número.
+3. Apretá **Nueva caja** para crearla en el centro de la vista. Si tenés seleccionado un texto común, aparece también **Convertir selección**, que lo transforma en caja enlazable.
 
 ### 4. Ajustar como cualquier texto
 Justificación, interlineado, interletra, estilos de párrafo, posición, tamaño de la caja, apariencia: todo funciona igual que en un texto normal **y se mantiene al actualizar**.
@@ -93,15 +108,12 @@ Justificación, interlineado, interletra, estilos de párrafo, posición, tamañ
 - Los párrafos toman el formato del primero: para centrar, centrá toda la caja.
 
 ### 5. Actualizar
-- **Actualizar caja**: descarga la hoja de la caja seleccionada y la regenera, aplicando los cambios pendientes (enlace, hoja, formatos, plantilla, rango).
-- **Actualizar todas**: descarga la hoja de cada caja (cada una la suya) y regenera todas las cajas del documento.
+- **Actualizar caja** (con una caja seleccionada): descarga su hoja y la regenera, aplicando los cambios pendientes (enlace, hoja, formatos, formato de línea, límites).
+- **⟳ Actualizar todas**: descarga la hoja de cada caja (cada una la suya) y regenera todas las cajas del documento. Sin nada enlazado en el panel, está como **Actualizar todas las cajas** debajo de "Esperando enlace…".
 
 Sin internet, se usan los datos guardados y el panel te avisa.
 
 Un Actualizar se deshace con **un solo Ctrl/Cmd+Z**, que también vuelve al enlace y la hoja anteriores.
-
-### 6. Ver plantilla / Ver datos
-**Ver plantilla** muestra `{Fecha} {Nombre}` en la caja, con el formato de cada variable. **Ver datos** vuelve a mostrar las filas. No se pierde nada al alternar.
 
 ### Cajas duplicadas
 Al duplicar una caja (Alt+arrastrar, copiar y pegar) se copia también su enlace. Cuando seleccionás una copia, recibe su propia identidad: si le cambiás la hoja, solo cambia esa copia.
@@ -173,6 +185,13 @@ Es una caja de área y el texto desborda. Agrandala o achicá el texto: el plugi
 Clic derecho → Abrir, o **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente**.
 
 ---
+
+## Licencia
+Sheeets es software libre y gratuito, bajo la licencia **[GNU GPL v3](LICENSE)**. © 2026 Adraff.
+
+- Podés usarlo, copiarlo, estudiarlo, modificarlo y compartirlo gratis, también en trabajos comerciales.
+- Si distribuís una versión modificada (o un producto que lo incluya), tiene que seguir siendo de código abierto bajo la misma licencia, con su código fuente disponible y manteniendo el aviso de autoría.
+- Se ofrece sin garantía.
 
 ## Más documentación
 - [docs/PRUEBAS.md](docs/PRUEBAS.md): guía de pruebas manuales.

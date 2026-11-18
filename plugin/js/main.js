@@ -10,10 +10,14 @@
 // Edits to a selected box stay pending in the panel and reach the document only with "Actualizar caja", in the same
 // host call as the new text, so one Ctrl+Z restores both the text and the previous config.
 var SCHEMA_VERSION = 2;
+var cepUtil = window.cep && window.cep.util;  // read before "var cep" below replaces the global CEP object
 var cep = window.__adobe_cep__;
 var $ = function (id) { return document.getElementById(id); };
 var PREVIEW_ROWS = 10;
-var MAX_SAMPLE_PX = 36;  // keeps the sample readable in a small panel
+var MAX_SAMPLE_PX = 22;  // keeps the sample inside its 34 px field
+// One color per column, used by the variable's name, its field marker and its template chip.
+var VAR_COLORS = ["#d4e05b", "#e86fd9", "#4fc3f7", "#ffb74d", "#81c784", "#b39ddb", "#ff8a65", "#4db6ac"];
+function varColor(v) { return VAR_COLORS[v.column % VAR_COLORS.length]; }
 var fonts = [], fontByName = {}, fontsByFamily = {}, familyList = [];
 var charStyles = [];
 var editing = null;      // name of the variable whose editor is open
@@ -34,6 +38,11 @@ function copy(o) { return JSON.parse(JSON.stringify(o)); }
 function sourceKey(s) { return (s.published ? "e/" : "") + s.id + "#" + s.gid; }
 function sheetData(s) { return s ? docData.sheets[sourceKey(s)] || null : null; }
 function fmtDate(iso) { return new Date(iso).toLocaleString(LANG === "en" ? "en-US" : "es-AR"); }
+function fmtShort(iso) {  // "18/11/26 a las 01:24 hs"
+    var d = new Date(iso), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    var day = LANG === "en" ? p(d.getMonth() + 1) + "/" + p(d.getDate()) : p(d.getDate()) + "/" + p(d.getMonth() + 1);
+    return t("%1 a las %2 hs", day + "/" + p(d.getFullYear() % 100), p(d.getHours()) + ":" + p(d.getMinutes()));
+}
 function sourceLabel(s) { return "«" + (s.title || t("Hoja de Google")) + (s.sheetName ? " · " + s.sheetName : "") + "»"; }
 
 function host(script, cb) {
@@ -104,9 +113,6 @@ function loadFonts(cb) {
         fontByName = {}; fontsByFamily = {};
         fonts.forEach(function (f) { fontByName[f.name] = f; (fontsByFamily[f.family] = fontsByFamily[f.family] || []).push(f); });
         familyList = Object.keys(fontsByFamily).sort(function (a, b) { return a.localeCompare(b); });
-        var dl = $("fontFamilies");
-        dl.innerHTML = "";
-        familyList.forEach(function (f) { dl.appendChild(el("option", { value: f })); });
         if (cb) cb();
     });
 }
@@ -229,7 +235,7 @@ function verifyLink() {
         download(src, function (err2) {
             if (seq !== verifySeq) return;
             if (err2) return setLinkMsg("✗ " + err2, "bad");
-            setLinkMsg("✓ " + src.title + " · " + src.sheetName, "good");
+            setLinkMsg(t("Verificado") + " · " + src.title, "good");
             setTimeout(function () { if (seq === verifySeq) { closeLinkDialog(); setSource(src); } }, 900);
         });
     });
@@ -354,20 +360,22 @@ function renderVars() {
     if (!cur.source) return box.appendChild(el("div", { className: "muted", textContent: t("Enlazá una hoja para ver sus columnas.") }));
     if (!data) return box.appendChild(el("div", { className: "muted", textContent: t("No hay datos guardados de esta hoja: apretá «Actualizar caja».") }));
     varsOf(cur, data.rows).forEach(function (v) {
-        var fmt = varFormat(v.name), open = editing === v.name;
-        var label = el("span", { className: "var-name" });
+        var fmt = varFormat(v.name), open = editing === v.name, color = varColor(v);
+        var label = el("div", { className: "var-name" });
         var sample = el("div", { className: "sample" });
+        var bar = el("div", { className: "var-bar" });
         var warn = el("div", { className: "warn" });
         var text = firstValue(data.rows, v.column) || v.name;
+        label.style.color = bar.style.background = color;
         var update = function () {
             label.textContent = v.name + (fmt.alias ? "  →  {" + fmt.alias + "}" : "");
             applySample(sample, fmt, text);
             warn.textContent = fontWarning(fmt);
         };
-        var btn = el("button", { textContent: open ? t("Cerrar") : t("Editar") });
+        var btn = el("button", { className: "var-edit" + (open ? " open" : ""), title: open ? t("Cerrar") : t("Editar") }, [el("i", { className: "ico i-edit" })]);
         btn.onclick = function () { editing = open ? null : v.name; renderVars(); };
-        var item = el("div", { className: "var" }, [el("div", { className: "var-head" }, [label, btn]), sample, warn]);
-        if (open) item.appendChild(buildEditor(fmt, function () { update(); renderChips(); }));
+        var item = el("div", { className: "var" }, [label, el("div", { className: "var-field" }, [sample, bar, btn]), warn]);
+        if (open) item.appendChild(buildEditor(fmt, function () { update(); renderChips(); renderTpl(); }));
         update();
         box.appendChild(item);
     });
@@ -376,6 +384,51 @@ function renderVars() {
 function num(input) {
     var v = parseFloat(String(input.value).replace(",", "."));
     return isNaN(v) ? null : v;
+}
+
+// Drop-down of installed families filtered by what's typed (CEP doesn't show <datalist> popups).
+// Arrows move, Enter picks, Escape closes. onPick() runs after the input gets the chosen family.
+var COMBO_MAX = 200;
+function fontCombo(input, onPick) {
+    var list = el("div", { className: "combo-list", hidden: true }), items = [], active = -1;
+    function show() {
+        var q = input.value.trim().toLowerCase();
+        var starts = [], contains = [];
+        familyList.forEach(function (f) {
+            var i = f.toLowerCase().indexOf(q);
+            if (i === 0) starts.push(f); else if (i > 0) contains.push(f);
+        });
+        items = starts.concat(contains).slice(0, COMBO_MAX);
+        list.innerHTML = "";
+        items.forEach(function (f, i) {
+            var it = el("div", { className: "combo-item", textContent: f });
+            it.addEventListener("mousedown", function (e) { e.preventDefault(); pick(i); });  // before the input's blur
+            list.appendChild(it);
+        });
+        active = -1;
+        list.hidden = !items.length;
+    }
+    function highlight(i) {
+        active = Math.max(0, Math.min(items.length - 1, i));
+        [].forEach.call(list.children, function (c, j) { c.classList.toggle("active", j === active); });
+        if (list.children[active]) list.children[active].scrollIntoView({ block: "nearest" });
+    }
+    function pick(i) {
+        input.value = items[i];
+        list.hidden = true;
+        onPick();
+    }
+    input.addEventListener("focus", show);
+    input.addEventListener("input", show);
+    input.addEventListener("blur", function () { list.hidden = true; });
+    input.addEventListener("keydown", function (e) {
+        if (list.hidden && e.key === "ArrowDown") return show();
+        if (list.hidden) return;
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); highlight(active + (e.key === "ArrowDown" ? 1 : -1)); }
+        else if (e.key === "Enter" && active >= 0) { e.preventDefault(); pick(active); }
+        else if (e.key === "Escape") { e.stopPropagation(); list.hidden = true; }
+    });
+    return el("div", { className: "combo" }, [input, list]);
 }
 
 function buildEditor(fmt, onChange) {
@@ -387,11 +440,11 @@ function buildEditor(fmt, onChange) {
     mode.value = fmt.mode === "style" ? "style" : "direct";
 
     // direct attributes; every empty field keeps the text's own formatting.
-    // The family is a searchable text field backed by the installed families (<datalist>).
+    // The family is a searchable text field with its own drop-down list of the installed families.
     var missing = fmt.font && !fontByName[fmt.font];
     var family = el("input", { placeholder: t("(como la caja) · escribí para buscar"), autocomplete: "off",
         value: fmt.font ? (missing ? fmt.family || fmt.font : fontByName[fmt.font].family) : "" });
-    family.setAttribute("list", "fontFamilies");
+    var familyBox = fontCombo(family, function () { commit({ target: family }); });
     var style = el("select");
     function familyMatch() {
         var v = family.value.trim().toLowerCase();
@@ -413,13 +466,13 @@ function buildEditor(fmt, onChange) {
     var tracking = el("input", { value: fmt.tracking == null ? "" : fmt.tracking, placeholder: t("(como la caja)"), inputMode: "decimal" });
     var baseline = el("input", { value: fmt.baseline == null ? "" : fmt.baseline, placeholder: t("(como la caja)"), inputMode: "decimal" });
     var direct = el("div", {}, [
-        field(t("Tipografía"), family), field(t("Estilo"), style), field(t("Tamaño (pt)"), size),
+        field(t("Tipografía"), familyBox), field(t("Estilo"), style), field(t("Tamaño (pt)"), size),
         el("label", { className: "inline" }, [colorOn, document.createTextNode(" " + t("Color propio") + " "), color]),
         field(t("Interletra (milésimas de em)"), tracking), field(t("Desplazamiento de línea base (pt)"), baseline)
     ]);
 
     // character style
-    var cs = el("select"), reload = el("button", { textContent: t("Recargar estilos") });
+    var cs = el("select"), reload = el("button", { className: "btn block", textContent: t("Recargar estilos") });
     function fillCharStyles() {
         cs.innerHTML = "";
         cs.appendChild(option("", charStyles.length ? t("(elegí un estilo)") : t("(no hay documento abierto)")));
@@ -429,9 +482,9 @@ function buildEditor(fmt, onChange) {
     }
     fillCharStyles();
     reload.onclick = function () { loadCharStyles(function () { fillCharStyles(); onChange(); }); };
-    var styleBox = el("div", {}, [field(t("Estilo de carácter de Illustrator"), cs), el("div", { className: "row" }, [reload])]);
+    var styleBox = el("div", {}, [field(t("Estilo de carácter de Illustrator"), cs), reload]);
 
-    var reset = el("button", { textContent: t("Quitar formato (como la caja)") });
+    var reset = el("button", { className: "btn block", textContent: t("Quitar formato (como la caja)") });
     reset.onclick = function () {
         ["mode", "font", "family", "style", "size", "color", "tracking", "baseline", "charStyle"].forEach(function (k) { delete fmt[k]; });
         fmt.mode = "direct";
@@ -478,7 +531,7 @@ function buildEditor(fmt, onChange) {
     });
     color.addEventListener("input", function () { colorOn.checked = true; commit(); });
 
-    return el("div", { className: "editor" }, [field(t("Alias (nombre en la plantilla)"), alias), field(t("Formato"), mode), direct, styleBox, el("div", { className: "row" }, [reset])]);
+    return el("div", { className: "editor" }, [field(t("Alias (nombre en la plantilla)"), alias), field(t("Formato"), mode), direct, styleBox, reset]);
 }
 
 // ---------- boxes ----------
@@ -624,7 +677,7 @@ function configForNewBox() {
     if (range.error) return range;
     var c = copy(draft);
     c.id = newId();
-    c.template = $("tpl").value; c.from = range.from; c.to = range.to; c.mode = "preview";
+    c.template = getTpl(); c.from = range.from; c.to = range.to; c.mode = "preview";
     return c;
 }
 function resetDraft() { draft = newDraft(); }
@@ -661,19 +714,75 @@ function renderAll() {
 }
 
 function renderSource() {
-    var s = cur.source, data = sheetData(s), link = $("linkBtn"), sheet = $("sheetBtn");
-    link.textContent = s ? (s.title || t("Hoja de Google")) : t("Enlazar");
+    var s = cur.source, data = sheetData(s), link = $("linkBtn"), title = s ? s.title || t("Hoja de Google") : "";
+    link.querySelector(".label").textContent = s ? title : t("Enlazar");
     link.title = s ? t("Cambiar el enlace: %1", s.url) : t("Enlazar una hoja de Google Sheets");
-    link.className = "wide " + (s ? "linked" : "primary");
-    sheet.hidden = !s;
-    if (s) sheet.textContent = t("Hoja: %1", s.sheetName || "gid " + s.gid) + "  ▾";
-    $("fetched").textContent = data ? t("Última descarga: %1", fmtDate(data.fetchedAt)) : "";
+    link.className = "btn " + (s ? "linked" : "primary");
+    $("waiting").hidden = !!s;
+    $("linked").hidden = $("tableBody").hidden = !s;
+    $("tableEmpty").hidden = !!s;
+    if (!s) return;
+    $("sheetBtn").textContent = $("sheetName").textContent = s.sheetName || "gid " + s.gid;
+    $("docName").textContent = title;
+    $("docName").title = t("Cambiar el enlace: %1", s.url);
+    $("fetched").textContent = data ? t("Última descarga: %1", fmtShort(data.fetchedAt)) : "";
 }
 
 function renderFields() {
-    $("tpl").value = cur.template || "";
+    renderTpl();
     $("from").value = cur.from || "";
     $("to").value = cur.to || "";
+}
+
+// ---------- line template (contenteditable, one line) ----------
+// The text is the model; the field is rebuilt on every change so each {token} shows its variable's typeface.
+
+function getTpl() { return $("tpl").textContent.replace(/ /g, " "); }
+
+function caretOffset(box) {
+    var s = window.getSelection();
+    if (!s.rangeCount || !box.contains(s.focusNode)) return null;
+    var r = document.createRange();
+    r.selectNodeContents(box);
+    r.setEnd(s.focusNode, s.focusOffset);
+    return r.toString().length;
+}
+
+function setCaret(box, pos) {
+    var w = document.createTreeWalker(box, NodeFilter.SHOW_TEXT), n, r = document.createRange();
+    while ((n = w.nextNode())) {
+        if (pos <= n.length) { r.setStart(n, pos); break; }
+        pos -= n.length;
+    }
+    if (!n) { r.selectNodeContents(box); r.collapse(false); }
+    r.collapse(true);
+    var s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+}
+
+function renderTpl(text) {
+    var box = $("tpl"), pos = caretOffset(box), data = sheetData(cur.source), byToken = {};
+    text = text == null ? cur.template || "" : text;
+    if (data) varsOf(cur, data.rows).forEach(function (v) { byToken[v.name] = byToken[v.alias || v.name] = v; });
+    box.innerHTML = "";
+    var re = /\{([^{}]*)\}/g, last = 0, m;
+    while ((m = re.exec(text))) {
+        if (m.index > last) box.appendChild(document.createTextNode(text.slice(last, m.index)));
+        var span = el("span", { className: "tok", textContent: m[0] }), v = byToken[m[1]], fmt = v && (cur.variables || {})[v.name];
+        if (fmt && fmt.mode !== "style" && fmt.font) span.style.fontFamily = cssFamily(fmt.font);
+        box.appendChild(span);
+        last = re.lastIndex;
+    }
+    if (last < text.length) box.appendChild(document.createTextNode(text.slice(last)));
+    if (pos != null) setCaret(box, pos);
+}
+
+function insertToken(token) {
+    var box = $("tpl"), pos = caretOffset(box);  // read before focus(), which moves the caret to the start
+    box.focus();
+    setCaret(box, pos == null ? getTpl().length : pos);
+    document.execCommand("insertText", false, token);  // fires "input"; keeps the field's own undo
 }
 
 function renderChips() {
@@ -681,15 +790,17 @@ function renderChips() {
     chips.innerHTML = "";
     vars.forEach(function (v) {
         var token = "{" + (v.alias || v.name) + "}";
-        var b = el("button", { textContent: token, title: t("Insertar %1", token) });
-        b.onclick = function () {
-            var tp = $("tpl"), s = tp.selectionStart == null ? tp.value.length : tp.selectionStart, e = tp.selectionEnd == null ? s : tp.selectionEnd;
-            tp.value = tp.value.slice(0, s) + token + tp.value.slice(e);
-            tp.focus(); tp.selectionStart = tp.selectionEnd = s + token.length;
-            tp.dispatchEvent(new Event("input"));
-        };
+        var b = el("button", { textContent: v.alias || v.name, title: t("Insertar %1", token) });
+        b.style.borderColor = varColor(v);
+        b.onclick = function () { insertToken(token); };
         chips.appendChild(b);
     });
+}
+
+function setBtn(id, text, primary) {
+    $(id).firstChild.textContent = text;
+    $(id).title = text;
+    $(id).classList.toggle("primary", primary);
 }
 
 function renderButtons() {
@@ -701,14 +812,16 @@ function renderButtons() {
             + (pending[cur.id] ? " · " + t("cambios sin aplicar") : "")
         : k === "text" ? t("Texto común seleccionado: enlazá una hoja y convertilo.")
         : t("Sin selección: enlazá una hoja y creá una caja nueva.");
-    $("sel").className = linked && pending[cur.id] ? "warn" : "muted";
+    $("sel").title = $("sel").textContent;
+    $("sel").className = linked && pending[cur.id] ? "warn" : "";
     $("linkBtn").disabled = k === "nodoc";
-    $("newBox").disabled = linked || !cur.source || k === "nodoc";
-    $("convert").disabled = k !== "text" || !cur.source;
-    $("updBox").disabled = !linked;
-    $("toggle").disabled = !linked;
-    $("toggle").textContent = linked && cur.mode === "template" ? t("Ver datos") : t("Ver plantilla");
-    $("updAll").disabled = k === "nodoc";
+    // Main button: Actualizar caja (linked box selected) or Nueva caja. "Convertir selección" only exists while
+    // plain text is selected; otherwise it's hidden and the main button takes the whole row.
+    setBtn("mainBtn", linked ? t("Actualizar caja") : t("Nueva caja"), true);
+    $("mainBtn").disabled = !linked && (!cur.source || k === "nodoc");
+    setBtn("secondBtn", t("Convertir selección"), false);
+    $("secondBtn").hidden = linked || k !== "text" || !cur.source;
+    $("updAll").disabled = $("updAllEmpty").disabled = k === "nodoc";
 }
 
 function renderPreview() {
@@ -752,54 +865,69 @@ $("pasteBtn").addEventListener("click", function () {
     });
 });
 
-$("tpl").addEventListener("input", function () { cur.template = $("tpl").value; changed(); });
+$("tpl").addEventListener("input", function () {
+    cur.template = getTpl();
+    renderTpl(cur.template);
+    changed();
+});
+$("tpl").addEventListener("keydown", function (e) { if (e.key === "Enter") e.preventDefault(); });  // one line only
+$("tpl").addEventListener("paste", function (e) {  // plain text, no formatting or line breaks
+    e.preventDefault();
+    document.execCommand("insertText", false, (e.clipboardData.getData("text/plain") || "").replace(/[\r\n]+/g, " "));
+});
 ["from", "to"].forEach(function (id) {
     $(id).addEventListener("input", function () {
         var r = readRange();
-        if (r.error) return;
+        if (r.error) return setStatus(r.error, "error");
+        setStatus("", "");
         cur.from = r.from; cur.to = r.to;
         changed();
     });
 });
 
-$("newBox").addEventListener("click", function () {
+// Limit arrows: "Desde" never goes below 2; "Hasta" goes back to empty ("Todas") past the last data row.
+document.querySelectorAll("[data-step]").forEach(function (b) {
+    b.addEventListener("click", function () {
+        var p = b.dataset.step.split(":"), input = $(p[0]), d = +p[1], data = sheetData(cur.source);
+        var last = data ? data.rows.length : null, from = parseInt($("from").value, 10) || 2, v = parseInt(input.value, 10);
+        if (p[0] === "from") v = Math.max(2, (isNaN(v) ? 2 : v) + d);
+        else if (isNaN(v)) v = d < 0 && last ? last : NaN;
+        else { v += d; if (v < from) v = from; if (last && v > last) v = NaN; }
+        input.value = isNaN(v) ? "" : v;
+        input.dispatchEvent(new Event("input"));
+    });
+});
+
+function newBox() {
     var c = configForNewBox();
     if (c.error) return setStatus(c.error, "error");
     runSingle("new", c, null, t("Caja creada"), null, resetDraft);
-});
+}
 
-$("convert").addEventListener("click", function () {
+function convertSelection() {
     var c = configForNewBox();
     if (c.error) return setStatus(c.error, "error");
     runSingle("selection", c, 0, t("Texto convertido en caja enlazable"), null, resetDraft);
-});
+}
 
 // Applies the selected box's pending edits (link, sheet, formats, template, range) with fresh data.
-$("updBox").addEventListener("click", function () {
+function updateBox() {
     var range = readRange();
     if (range.error) return setStatus(range.error, "error");
     var box = cur;
-    box.template = $("tpl").value; box.from = range.from; box.to = range.to;
+    box.template = getTpl(); box.from = range.from; box.to = range.to;
+    box.mode = "preview";  // the panel no longer offers "Ver plantilla": a box left showing its template gets its data back
     guardEdits([{ hash: selection.hash, config: box }], function () {
         withFreshData([box.source], function (w) {
             runSingle("selection", box, box.probe, t("Caja actualizada"), w, function () { delete pending[box.id]; });
         });
     });
-});
+}
 
-// Switches the selected box between data and template; uses cached data (no download).
-$("toggle").addEventListener("click", function () {
-    var box = cur, prev = box.mode;
-    box.mode = prev === "template" ? "preview" : "template";
-    guardEdits([{ hash: selection.hash, config: box }], function () {
-        var m = makeJob("selection", box, box.probe);
-        if (m.error) { box.mode = prev; return setStatus(m.error, "error"); }
-        applyJobs([m.job], m.warnings, box.mode === "template" ? t("Mostrando la plantilla.") : t("Mostrando los datos."), null,
-            function () { delete pending[box.id]; });
-    });
-});
+$("mainBtn").addEventListener("click", function () { if (isBox()) updateBox(); else newBox(); });
+$("secondBtn").addEventListener("click", convertSelection);
 
-$("updAll").addEventListener("click", function () {
+function updateAll() {
     host("lktListBoxes()", function (res) {
         var boxes = [];
         try { boxes = JSON.parse(res); } catch (e) { return setStatus(t("No se pudieron leer las cajas del documento."), "error"); }
@@ -809,11 +937,63 @@ $("updAll").addEventListener("click", function () {
             withFreshData(boxes.map(function (b) { return (pending[b.config.id] || b.config).source; }), function (w) { updateBoxes(boxes, w); });
         });
     });
+}
+$("updAll").addEventListener("click", updateAll);
+$("updAllEmpty").addEventListener("click", updateAll);
+
+// ---------- tabs, menu, links ----------
+
+document.querySelectorAll("[data-view]").forEach(function (b) {
+    b.addEventListener("click", function () {
+        document.querySelectorAll("[data-view]").forEach(function (o) { o.classList.toggle("active", o === b); $(o.dataset.view).hidden = o !== b; });
+    });
 });
+$("docName").addEventListener("click", openLinkDialog);
+
+$("moreBtn").addEventListener("click", function () { $("menu").hidden = false; });
+$("menuClose").addEventListener("click", function () { $("menu").hidden = true; });
+["menu", "linkDlg"].forEach(function (id) {  // a click on the dimmed area closes the overlay
+    $(id).addEventListener("click", function (e) { if (e.target === $(id)) { if (id === "menu") $(id).hidden = true; else closeLinkDialog(); } });
+});
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") $("menu").hidden = true; });
 
 document.querySelectorAll("[data-lang]").forEach(function (b) {
     b.addEventListener("click", function () { setLang(b.dataset.lang); applyStaticText(); renderAll(); });
 });
+
+function openUrl(url) {
+    if (cepUtil && cepUtil.openURLInDefaultBrowser) cepUtil.openURLInDefaultBrowser(url);
+    else window.open(url);
+}
+document.querySelectorAll("[data-url]").forEach(function (b) { b.addEventListener("click", function () { openUrl(b.dataset.url); }); });
+
+// The version shown in the menu comes from the manifest, the same source the installer and the .zip use.
+function loadVersion() {
+    var x = new XMLHttpRequest();
+    x.open("GET", "CSXS/manifest.xml");
+    x.onload = function () { var m = /ExtensionBundleVersion="([^"]+)"/.exec(x.responseText || ""); $("version").textContent = m ? m[1] : ""; };
+    x.send();
+}
+
+// Adobe Clean, Illustrator's UI typeface, is loaded from Illustrator's own install (never shipped with the plugin).
+// Windows: <app>\Support Files\Contents\Windows\Illustrator.exe -> <app>\Support Files\Required\UxpResources\AdobeCleanUX.
+// shortcut: the macOS location is a guess (inside the .app); if it's wrong the panel falls back to the system font.
+function loadUiFont() {
+    var app = null;
+    try { app = cep && cep.getSystemPath("hostApplication"); } catch (e) { /* not available */ }
+    if (!app) return;
+    if (!/^file:/.test(app)) app = "file:///" + app.replace(/\\/g, "/").replace(/^\/+/, "");
+    app = app.replace(/\/?$/, "/");
+    var dirs = ["../../../Required/UxpResources/AdobeCleanUX/", "Contents/Required/UxpResources/AdobeCleanUX/"];
+    var faces = [["Regular", 400, "normal"], ["Bold", 700, "normal"], ["It", 400, "italic"], ["BoldIt", 700, "italic"]];
+    var css = faces.map(function (f) {
+        var src = ['local("AdobeClean-' + f[0] + '")'].concat(dirs.map(function (d) {
+            return 'url("' + new URL(d + "AdobeClean-" + f[0] + ".otf", app).href + '") format("opentype")';
+        }));
+        return '@font-face{font-family:"Adobe Clean";font-weight:' + f[1] + ";font-style:" + f[2] + ";src:" + src.join(",") + ";}";
+    }).join("\n");
+    document.head.appendChild(el("style", { textContent: css }));
+}
 
 function applyTheme() {
     if (!cep) return;
@@ -824,6 +1004,8 @@ function applyTheme() {
     } catch (e) { /* keep default dark theme */ }
 }
 
+loadUiFont();
+loadVersion();
 applyTheme();
 applyStaticText();
 if (cep) {

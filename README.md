@@ -24,23 +24,34 @@ No admin rights and no extra software are needed.
 
 ---
 
-## Install
+## Install (step by step)
 
-### Windows
-1. Unzip the `.zip`.
-2. Close Illustrator.
-3. Double-click **`Instalar.bat`**.
-4. Open Illustrator → **Window → Extensions → Sheeets**.
+### Step 1: download
+1. Go to the **[Releases](https://github.com/Adraff/Sheeets/releases/latest)** page.
+2. Under **Assets**, download **`Sheeets-<version>.zip`**. Don't use "Source code": that one is for developers.
+3. Unzip it:
+   - Windows: right-click the `.zip` → **Extract All…** → **Extract**.
+   - macOS: double-click the `.zip`.
 
-If Windows shows "Windows protected your PC", click **More info → Run anyway**.
+### Step 2: install on Windows
+1. Close Illustrator.
+2. In the unzipped folder, double-click **`Instalar.bat`** ("Instalar" means "Install").
+3. If Windows shows "Windows protected your PC", click **More info → Run anyway**.
+4. A black window shows the progress. When it says **"Listo. Sheeets … quedó instalada."** (done, installed), press Enter to close it.
 
-### macOS
-1. Unzip the `.zip`.
-2. Close Illustrator.
-3. **Right-click → Open** on **`Instalar.command`** and confirm **Open**. A plain double-click may be blocked because the file isn't signed.
-4. Open Illustrator → **Window → Extensions → Sheeets**.
+### Step 2: install on macOS
+1. Close Illustrator.
+2. In the unzipped folder, **right-click → Open** on **`Instalar.command`** and confirm **Open**. A plain double-click may be blocked because the file isn't signed.
+3. Terminal opens with the progress. When it says **"Listo. Sheeets … quedó instalada."**, press Enter.
 
 If macOS still refuses: open **Terminal**, type `bash ` (with a space), drag `Instalar.command` into the window and press Enter.
+
+### Step 3: open the panel
+1. Open Illustrator.
+2. Go to **Window → Extensions → Sheeets**.
+3. Dock it next to your other panels if you like. Collapsed, it shows the Sheeets logo.
+
+If the panel doesn't show up or is empty, see [Troubleshooting](#troubleshooting).
 
 ### What the installer does
 - Copies the plugin to your user folder:
@@ -59,15 +70,19 @@ Adobe only loads unsigned extensions when `PlayerDebugMode` is on. Signing requi
 
 ## Use
 
-The panel follows Illustrator's language (English or Spanish). Use the **ES / EN** buttons at the top to switch.
+The panel has two tabs at the bottom:
+- **Parameters:** link, sheet, variables, line format and buttons.
+- **Table:** document, sheet, limits (from/to which row) and a preview of the sheet.
+
+The **⋯** menu at the top right has the **language** (English or Spanish; Illustrator's by default), credits, version and **Check for updates**.
 
 ### 1. Link a sheet
 Every box has **its own link**: one box can use one sheet and another box a different one.
 
 1. In Google Sheets: **Share → Anyone with the link → Viewer**, and copy the link.
-2. In the panel, press **Link**. A window opens: paste the link with **Paste** or Ctrl+V (Cmd+V on Mac).
-3. The link is checked automatically. ✓ shows the file name and the window closes; ✗ shows the reason and the window stays open.
-4. The **Link** button now shows the file name: click it to change the link. Below it, **Sheet: …** shows the selected tab: click it to list every tab in the file and pick another.
+2. In the panel, press **Link**. A window opens: paste the link with the paste icon or Ctrl+V (Cmd+V on Mac).
+3. The link is checked automatically (or with **Check**). If it's right, **Verified** appears and the window closes; otherwise the reason appears and the window stays open.
+4. The button now shows the file name: click it to change the link. Below it, **Sheet** shows the selected tab: click it to list every tab in the file and pick another.
 
 Row 1 of the sheet holds the variable names. Blank columns and blank rows are ignored. The data is saved inside the `.ai` file and travels with it.
 
@@ -77,16 +92,16 @@ Row 1 of the sheet holds the variable names. Blank columns and blank rows are ig
 ### 2. Format variables (optional)
 By default **no** formatting is applied: text uses Illustrator's settings, or the formatting of the text you converted. If you change the size or font of the whole box in Illustrator, it is kept on update.
 
-To make a column look different, press **Edit** on that variable:
+Each variable shows its first value with its current format. To make a column look different, press that variable's **pencil**:
 - **Direct attributes**: typeface (type to search), style (Bold, Light…), size, color, tracking and baseline shift. An empty field keeps the box's own value.
 - **Character style**: uses one of the document's character styles.
 - **Alias**: another name for the template, e.g. `{D}` instead of `{Date}`.
 - **Clear format**: back to the box's own formatting.
 
 ### 3. Create a box
-1. Write the **Template**, e.g. `{Date} {Name}`. The variable buttons insert a token at the cursor. You can put fixed text between variables: `{Date} – {Name}`.
-2. Choose the range: **From row** (2 = first data row) and **To row** (empty = all rows).
-3. Press **New box** to create it in the center of the view, or select existing text and press **Convert selection**.
+1. Write the **Line format**, e.g. `{Date} {Name}`. The colored variable buttons insert a token at the cursor. You can put fixed text between variables: `{Date} – {Name}`.
+2. In the **Table** tab, set the **Limits**: **From row** (2 = first data row) and **To row** (**All** = to the end). The arrows step the number up and down.
+3. Press **New box** to create it in the center of the view. With plain text selected, **Convert selection** also appears and turns that text into a linked box.
 
 ### 4. Adjust it like any text
 Justification, leading, tracking, paragraph styles, position, box size, appearance: everything works as with normal text and **is kept on update**.
@@ -95,15 +110,12 @@ Justification, leading, tracking, paragraph styles, position, box size, appearan
 - All paragraphs take the first paragraph's attributes: to center, center the whole box.
 
 ### 5. Update
-- **Update box**: downloads the selected box's sheet and regenerates it, applying any pending change (link, sheet, formats, template, range).
-- **Update all**: downloads each box's own sheet and regenerates every box in the document.
+- **Update box** (with a box selected): downloads its sheet and regenerates it, applying any pending change (link, sheet, formats, line format, limits).
+- **⟳ Update all**: downloads each box's own sheet and regenerates every box in the document. With nothing linked in the panel, it's the **Update all boxes** link under "Waiting for a link…".
 
 Offline, the saved data is used and the panel tells you.
 
 An update is a single **Ctrl/Cmd+Z**: undoing it also brings back the previous link and sheet.
-
-### 6. Show template / Show data
-**Show template** displays `{Date} {Name}` in the box with each variable's format. **Show data** shows the rows again. Nothing is lost when switching.
 
 ### Duplicated boxes
 Duplicating a box (Alt+drag, copy/paste) copies its link. When you select a copy, it gets its own identity, so changing its sheet only affects that copy.
@@ -175,6 +187,13 @@ It's an area text box and the text overflows. Make it bigger or the text smaller
 Right-click → Open, or **System Settings → Privacy & Security → Open Anyway**.
 
 ---
+
+## License
+Sheeets is free and open-source software under the **[GNU GPL v3](LICENSE)**. © 2026 Adraff.
+
+- You can use, copy, study, modify and share it for free, including for commercial work.
+- If you distribute a modified version (or a product that includes it), it must stay open source under the same license, with its source code available and the copyright notice kept.
+- It comes with no warranty.
 
 ## More documentation (Spanish)
 - [docs/PRUEBAS.md](docs/PRUEBAS.md): manual test guide.

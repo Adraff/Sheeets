@@ -1,7 +1,7 @@
 # Dev-only static file server (no Node/Python on this machine). Serves the repo root on http://localhost:8765/
 param([int]$Port = 8765)
 $root = Split-Path $PSScriptRoot -Parent
-$types = @{ ".html" = "text/html; charset=utf-8"; ".js" = "text/javascript; charset=utf-8"; ".css" = "text/css; charset=utf-8"; ".json" = "application/json" }
+$types = @{ ".html" = "text/html; charset=utf-8"; ".js" = "text/javascript; charset=utf-8"; ".css" = "text/css; charset=utf-8"; ".json" = "application/json"; ".svg" = "image/svg+xml"; ".png" = "image/png"; ".xml" = "text/xml; charset=utf-8" }
 $l = New-Object Net.HttpListener
 $l.Prefixes.Add("http://localhost:$Port/")
 $l.Start()

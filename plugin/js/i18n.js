@@ -15,6 +15,29 @@ var EN = {
     "(igual que la columna)": "(same as the column)",
     "(no hay documento abierto)": "(no document open)",
     "(se muestran las primeras %1)": "(showing the first %1)",
+    "%1 a las %2 hs": "%1 at %2",
+    "{Nombre} cumple el {Fecha}": "{Name}'s birthday is {Date}",
+    "Actualizar todas las cajas": "Update all boxes",
+    "Buscar actualizaciones": "Check for updates",
+    "Créditos": "Credits",
+    "Desde la fila": "From row",
+    "Documento": "Document",
+    "Enlace con Google Sheets": "Google Sheets link",
+    "Enlace de Google Sheets": "Google Sheets link",
+    "Esperando enlace…": "Waiting for a link…",
+    "Español": "Spanish",
+    "Formato de línea": "Line format",
+    "Hasta la fila": "To row",
+    "Hoja": "Sheet",
+    "Idioma": "Language",
+    "Inglés": "English",
+    "Límites": "Limits",
+    "Más opciones": "More options",
+    "Parámetros": "Parameters",
+    "Tabla": "Table",
+    "Todas": "All",
+    "Verificado": "Verified",
+    "Versión": "Version",
     "«Hasta fila» tiene que ser mayor o igual que «Desde fila».": "“To row” must be greater than or equal to “From row”.",
     "1 caja actualizada.": "1 box updated.",
     "1 fila de datos": "1 data row",
@@ -157,7 +180,11 @@ function setLang(lang) {
 function applyStaticText() {
     document.documentElement.lang = LANG === "en" ? "en" : "es-AR";
     document.querySelectorAll("[data-i18n]").forEach(function (n) { n.textContent = t(n.getAttribute("data-i18n")); });
-    document.querySelectorAll("[data-i18n-ph]").forEach(function (n) { n.placeholder = t(n.getAttribute("data-i18n-ph")); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(function (n) {
+        var text = t(n.getAttribute("data-i18n-ph"));
+        if ("placeholder" in n) n.placeholder = text; else n.setAttribute("data-placeholder", text);  // contenteditable div
+    });
+    document.querySelectorAll("[data-i18n-title]").forEach(function (n) { n.title = t(n.getAttribute("data-i18n-title")); });
     document.querySelectorAll("[data-lang]").forEach(function (b) { b.classList.toggle("active", b.dataset.lang === LANG); });
 }
 

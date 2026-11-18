@@ -1,2 +1,5 @@
 dist/
 .claude/
+
+# design sources (not part of the plugin)
+DiseñoSheeets/
