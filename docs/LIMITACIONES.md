@@ -18,6 +18,7 @@
 - **Idioma.** El panel está en inglés y español. Los instaladores muestran sus mensajes solo en español.
 - **Illustrator modificado o virtualizado.** Algunas instalaciones leen una copia propia del registro y necesitan el arreglo del README.
 - **macOS.** El instalador `.command` no se probó en una Mac real. La tipografía del panel (Adobe Clean) se carga desde la instalación de Illustrator; en Mac la ruta es una suposición y, si falla, el panel usa la fuente del sistema.
+- **Alias y estilos de carácter.** El editor de variables ya no los ofrece. Las cajas que ya los tenían conservan el alias; un estilo de carácter guardado deja de aplicarse en cuanto se edita esa variable.
 - **Ver plantilla.** Desde 0.3.0 el panel ya no tiene el botón "Ver plantilla". Una caja que quedó mostrando la plantilla vuelve a los datos con "Actualizar caja".
 - **Cajas enlazadas (threaded).** No se probó texto que fluye entre varias cajas enlazadas de Illustrator.
 

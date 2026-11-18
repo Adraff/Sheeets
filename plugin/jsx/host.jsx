@@ -181,6 +181,23 @@ function lktStr(s) {
     return '"' + String(s).replace(/[\\"]/g, "\\$&").replace(/[\x00-\x1f]/g, function (c) { return "\\u" + ("000" + c.charCodeAt(0).toString(16)).slice(-4); }) + '"';
 }
 
+// Opens Illustrator's color picker on "#rrggbb" (black when empty) and returns the chosen color as "#rrggbb".
+// Cancel returns the starting color. CMYK/gray results (CMYK documents) are converted to RGB for storage.
+function lktPickColor(hex) {
+    var c = new RGBColor();
+    c.red = hex ? parseInt(hex.substr(1, 2), 16) : 0;
+    c.green = hex ? parseInt(hex.substr(3, 2), 16) : 0;
+    c.blue = hex ? parseInt(hex.substr(5, 2), 16) : 0;
+    var r = app.showColorPicker(c), rgb;
+    if (r.typename === "RGBColor") rgb = [r.red, r.green, r.blue];
+    else if (r.typename === "CMYKColor") rgb = app.convertSampleColor(ImageColorSpace.CMYK, [r.cyan, r.magenta, r.yellow, r.black], ImageColorSpace.RGB, ColorConvertPurpose.defaultpurpose);
+    else if (r.typename === "GrayColor") { var g = 255 * (1 - r.gray / 100); rgb = [g, g, g]; }
+    else return "UNSUPPORTED";
+    var out = "#";
+    for (var i = 0; i < 3; i++) out += ("0" + Math.max(0, Math.min(255, Math.round(rgb[i]))).toString(16)).slice(-2);
+    return out;
+}
+
 function lktSaveDocData(json) {
     if (!app.documents.length) return "NO_DOC";
     lktXmp();

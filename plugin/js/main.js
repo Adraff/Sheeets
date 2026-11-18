@@ -148,7 +148,7 @@ function loadFromDoc() {
         docData = migrateDoc(d) || emptyDoc();
         docData.sheets = docData.sheets || {};
         Object.keys(docData.sheets).forEach(function (k) { docData.sheets[k].rows = cleanRows(docData.sheets[k].rows); });
-        draft = newDraft(); cur = draft; editing = null; lastSelRes = null; pending = {}; lastSeenRaw = {};
+        draft = newDraft(); cur = draft; closeVarEditor(); lastSelRes = null; pending = {}; lastSeenRaw = {};
         loadCharStyles(function () { renderAll(); readSelection(); loading(false); });
     });
 }
@@ -259,6 +259,11 @@ function readClipboard(cb) {
 // New link or sheet for the current config. A selected box only changes when "Actualizar caja" is pressed.
 function setSource(src) {
     cur.source = src;
+    // A new box starts with every variable in its line format: "{A} | {B} | {C}".
+    var data = sheetData(src);
+    if (!isBox() && !cur.template.trim() && data) {
+        cur.template = varsOf(cur, data.rows).map(function (v) { return "{" + (v.alias || v.name) + "}"; }).join(" | ");
+    }
     changed();
     renderAll();
     if (isBox()) setStatus(t("Hoja cambiada: apretá «Actualizar caja» para aplicarla a la caja."), "warn");
@@ -360,7 +365,7 @@ function renderVars() {
     if (!cur.source) return box.appendChild(el("div", { className: "muted", textContent: t("Enlazá una hoja para ver sus columnas.") }));
     if (!data) return box.appendChild(el("div", { className: "muted", textContent: t("No hay datos guardados de esta hoja: apretá «Actualizar caja».") }));
     varsOf(cur, data.rows).forEach(function (v) {
-        var fmt = varFormat(v.name), open = editing === v.name, color = varColor(v);
+        var fmt = varFormat(v.name), color = varColor(v);
         var label = el("div", { className: "var-name" });
         var sample = el("div", { className: "sample" });
         var bar = el("div", { className: "var-bar" });
@@ -372,10 +377,9 @@ function renderVars() {
             applySample(sample, fmt, text);
             warn.textContent = fontWarning(fmt);
         };
-        var btn = el("button", { className: "var-edit" + (open ? " open" : ""), title: open ? t("Cerrar") : t("Editar") }, [el("i", { className: "ico i-edit" })]);
-        btn.onclick = function () { editing = open ? null : v.name; renderVars(); };
+        var btn = el("button", { className: "var-edit", title: t("Editar") }, [el("i", { className: "ico i-edit" })]);
+        btn.onclick = function () { openVarEditor(v); };
         var item = el("div", { className: "var" }, [label, el("div", { className: "var-field" }, [sample, bar, btn]), warn]);
-        if (open) item.appendChild(buildEditor(fmt, function () { update(); renderChips(); renderTpl(); }));
         update();
         box.appendChild(item);
     });
@@ -431,15 +435,41 @@ function fontCombo(input, onPick) {
     return el("div", { className: "combo" }, [input, list]);
 }
 
-function buildEditor(fmt, onChange) {
-    var field = function (text, input) { return el("label", { textContent: text }, [input]); };
+// ---------- variable editor (popup) ----------
+// Every change applies at once to the panel (pending for a selected box, as any other edit); the popup only closes.
+
+var editingVar = null;   // the variable shown in the popup ({ name, column })
+function openVarEditor(v) {
+    editing = v.name;
+    editingVar = v;
+    $("varTitle").textContent = v.name;
+    $("varTitle").style.color = varColor(v);
+    renderVarEditor();
+    $("varDlg").hidden = false;
+}
+
+function renderVarEditor() {
+    var body = $("varBody");
+    body.innerHTML = "";
+    var data = sheetData(cur.source), text = (data && firstValue(data.rows, editingVar.column)) || editingVar.name;
+    body.appendChild(buildEditor(varFormat(editing), text, function () { renderVars(); renderChips(); renderTpl(); }));
+}
+
+function closeVarEditor() {
+    editing = null;
+    $("varDlg").hidden = true;
+}
+
+// Asks Illustrator's own color picker. cb("#rrggbb"), or cb(null) if it couldn't open.
+function pickColor(hex, cb) {
+    host("lktPickColor(" + jsLiteral(hex || "") + ")", function (res) { cb(/^#[0-9a-f]{6}$/i.test(res) ? res.toLowerCase() : null); });
+}
+
+function buildEditor(fmt, sampleText, onChange) {
+    var field = function (text, input, cls) { return el("label", { className: cls || "", textContent: text }, [input]); };
     var option = function (value, text) { return el("option", { value: value, textContent: text }); };
 
-    var alias = el("input", { value: fmt.alias || "", placeholder: t("(igual que la columna)") });
-    var mode = el("select", {}, [option("direct", t("Atributos directos")), option("style", t("Estilo de carácter"))]);
-    mode.value = fmt.mode === "style" ? "style" : "direct";
-
-    // direct attributes; every empty field keeps the text's own formatting.
+    // Every empty field keeps the text's own formatting.
     // The family is a searchable text field with its own drop-down list of the installed families.
     var missing = fmt.font && !fontByName[fmt.font];
     var family = el("input", { placeholder: t("(como la caja) · escribí para buscar"), autocomplete: "off",
@@ -460,41 +490,43 @@ function buildEditor(fmt, onChange) {
     fillStyles();
     if (fmt.font) style.value = fmt.font;
 
-    var size = el("input", { value: fmt.size == null ? "" : fmt.size, placeholder: t("(como la caja)"), inputMode: "decimal" });
-    var colorOn = el("input", { type: "checkbox", checked: !!fmt.color });
-    var color = el("input", { type: "color", value: fmt.color || "#000000" });
-    var tracking = el("input", { value: fmt.tracking == null ? "" : fmt.tracking, placeholder: t("(como la caja)"), inputMode: "decimal" });
+    var size = el("input", { value: fmt.size == null ? "" : fmt.size, placeholder: t("auto"), inputMode: "decimal" });
+    var tracking = el("input", { value: fmt.tracking == null ? "" : fmt.tracking, placeholder: t("auto"), inputMode: "decimal" });
     var baseline = el("input", { value: fmt.baseline == null ? "" : fmt.baseline, placeholder: t("(como la caja)"), inputMode: "decimal" });
-    var direct = el("div", {}, [
-        field(t("Tipografía"), familyBox), field(t("Estilo"), style), field(t("Tamaño (pt)"), size),
-        el("label", { className: "inline" }, [colorOn, document.createTextNode(" " + t("Color propio") + " "), color]),
-        field(t("Interletra (milésimas de em)"), tracking), field(t("Desplazamiento de línea base (pt)"), baseline)
-    ]);
 
-    // character style
-    var cs = el("select"), reload = el("button", { className: "btn block", textContent: t("Recargar estilos") });
-    function fillCharStyles() {
-        cs.innerHTML = "";
-        cs.appendChild(option("", charStyles.length ? t("(elegí un estilo)") : t("(no hay documento abierto)")));
-        charStyles.forEach(function (n) { cs.appendChild(option(n, n)); });
-        if (fmt.charStyle && charStyles.indexOf(fmt.charStyle) < 0) cs.appendChild(option(fmt.charStyle, t("(falta) %1", fmt.charStyle)));
-        cs.value = fmt.charStyle || "";
+    // Color: a swatch only. No color = Illustrator's "none" swatch (white, red slash); a click opens Illustrator's picker.
+    var swatch = el("button", { className: "swatch" });
+    var noColor = el("button", { className: "icon-btn swatch-clear", title: t("Quitar color") }, [el("i", { className: "ico i-cross" })]);
+    function showColor() {
+        swatch.classList.toggle("none", !fmt.color);
+        swatch.style.backgroundColor = fmt.color || "";
+        swatch.title = fmt.color ? fmt.color.toUpperCase() + " · " + t("Cambiar color") : t("Sin color · elegir uno");
+        noColor.style.visibility = fmt.color ? "visible" : "hidden";  // keeps its space: the row never jumps
     }
-    fillCharStyles();
-    reload.onclick = function () { loadCharStyles(function () { fillCharStyles(); onChange(); }); };
-    var styleBox = el("div", {}, [field(t("Estilo de carácter de Illustrator"), cs), reload]);
+    swatch.onclick = function () {
+        pickColor(fmt.color, function (hex) {
+            if (!hex) return problemsBox.textContent = t("No se pudo abrir el selector de color de Illustrator.");
+            if (hex === fmt.color) return;
+            fmt.color = hex; showColor(); commit();
+        });
+    };
+    noColor.onclick = function () { fmt.color = null; showColor(); commit(); };
+    var colorBox = el("div", { className: "swatch-row" }, [swatch, noColor]);
 
-    var reset = el("button", { className: "btn block", textContent: t("Quitar formato (como la caja)") });
+    // Preview of the variable's first value with the format being edited.
+    var preview = el("div", { className: "sample" });
+    var previewBox = el("div", { className: "var-field preview" }, [preview]);
+    function showPreview() { applySample(preview, fmt, sampleText); }
+
+    var problemsBox = el("div", { className: "warn" });
+    var reset = el("button", { className: "link reset-link", textContent: t("Eliminar formato") });
     reset.onclick = function () {
         ["mode", "font", "family", "style", "size", "color", "tracking", "baseline", "charStyle"].forEach(function (k) { delete fmt[k]; });
         fmt.mode = "direct";
-        editing = null;
         changed();
-        renderVars();
+        onChange();
+        renderVarEditor();
     };
-
-    function showMode() { direct.hidden = mode.value !== "direct"; styleBox.hidden = mode.value !== "style"; }
-    showMode();
 
     function commit(e) {
         if (e && e.target === family) {
@@ -504,34 +536,36 @@ function buildEditor(fmt, onChange) {
             if (list.length) style.value = (regular || list[0]).name;
             else if (family.value.trim()) return;  // still typing a family name: wait for a match
         }
-        if (e && e.target === mode) showMode();
         var problems = [];
         var sz = num(size), tr = num(tracking), bl = num(baseline);
         if (size.value.trim() && (sz === null || sz <= 0 || sz > 1296)) { problems.push(t("El tamaño tiene que ser un número entre 0,1 y 1296.")); sz = fmt.size; }
         if (tracking.value.trim() && (tr === null || tr < -1000 || tr > 10000)) { problems.push(t("La interletra tiene que estar entre -1000 y 10000.")); tr = fmt.tracking; }
         if (baseline.value.trim() && bl === null) { problems.push(t("El desplazamiento de línea base tiene que ser un número.")); bl = fmt.baseline; }
 
-        var a = alias.value.trim();
-        if (/[{}]/.test(a)) { problems.push(t("El alias no puede tener llaves { }.")); a = fmt.alias || ""; }
-        fmt.alias = a || null;
-        fmt.mode = mode.value;
+        fmt.mode = "direct";  // the popup only edits direct attributes (a stored character style is left unused)
         var f = familyMatch() ? fontByName[style.value] : null;
         if (!family.value.trim()) { fmt.font = fmt.family = fmt.style = null; }
         else if (f) { fmt.font = f.name; fmt.family = f.family; fmt.style = f.style; }
         // else: a font missing on this machine stays as stored
         fmt.size = sz; fmt.tracking = tr; fmt.baseline = bl;
-        fmt.color = colorOn.checked ? color.value : null;
-        fmt.charStyle = cs.value || null;
-        setStatus(problems.join(" "), problems.length ? "error" : "");
+        problemsBox.textContent = problems.join(" ");
+        showPreview();
         onChange();
         changed();
     }
-    [alias, mode, family, style, size, colorOn, color, tracking, baseline, cs].forEach(function (i) {
-        i.addEventListener(i.tagName === "SELECT" || i.type === "checkbox" || i.type === "color" ? "change" : "input", commit);
+    [family, style, size, tracking, baseline].forEach(function (i) {
+        i.addEventListener(i.tagName === "SELECT" ? "change" : "input", commit);
     });
-    color.addEventListener("input", function () { colorOn.checked = true; commit(); });
+    showColor();
+    showPreview();
 
-    return el("div", { className: "editor" }, [field(t("Alias (nombre en la plantilla)"), alias), field(t("Formato"), mode), direct, styleBox, reset]);
+    return el("div", { className: "editor" }, [
+        field(t("Vista previa"), previewBox),
+        el("div", { className: "row2" }, [field(t("Tipografía"), familyBox, "grow"), field(t("Variante"), style, "variant")]),
+        el("div", { className: "row2" }, [field(t("Tamaño"), size), field(t("Interletra"), tracking), field(t("Color"), colorBox, "color-field")]),
+        field(t("Desplazamiento de línea base (pt)"), baseline),
+        problemsBox, reset
+    ]);
 }
 
 // ---------- boxes ----------
@@ -592,7 +626,7 @@ function readSelection() {
             return;
         }
         cur = nextCur;
-        editing = null;
+        closeVarEditor();
         $("sheetList").hidden = true;
         withLoading(t("Cargando…"), renderAll);
     });
@@ -771,6 +805,7 @@ function renderTpl(text) {
         if (m.index > last) box.appendChild(document.createTextNode(text.slice(last, m.index)));
         var span = el("span", { className: "tok", textContent: m[0] }), v = byToken[m[1]], fmt = v && (cur.variables || {})[v.name];
         if (fmt && fmt.mode !== "style" && fmt.font) span.style.fontFamily = cssFamily(fmt.font);
+        if (v) span.style.color = varColor(v);  // same color as the variable's name and chip
         box.appendChild(span);
         last = re.lastIndex;
     }
@@ -952,10 +987,12 @@ $("docName").addEventListener("click", openLinkDialog);
 
 $("moreBtn").addEventListener("click", function () { $("menu").hidden = false; });
 $("menuClose").addEventListener("click", function () { $("menu").hidden = true; });
-["menu", "linkDlg"].forEach(function (id) {  // a click on the dimmed area closes the overlay
-    $(id).addEventListener("click", function (e) { if (e.target === $(id)) { if (id === "menu") $(id).hidden = true; else closeLinkDialog(); } });
+$("varClose").addEventListener("click", closeVarEditor);
+var overlayClose = { menu: function () { $("menu").hidden = true; }, linkDlg: closeLinkDialog, varDlg: closeVarEditor };
+Object.keys(overlayClose).forEach(function (id) {  // a click on the dimmed area closes the overlay
+    $(id).addEventListener("click", function (e) { if (e.target === $(id)) overlayClose[id](); });
 });
-document.addEventListener("keydown", function (e) { if (e.key === "Escape") $("menu").hidden = true; });
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $("menu").hidden = true; closeVarEditor(); } });
 
 document.querySelectorAll("[data-lang]").forEach(function (b) {
     b.addEventListener("click", function () { setLang(b.dataset.lang); applyStaticText(); renderAll(); });
@@ -965,15 +1002,46 @@ function openUrl(url) {
     if (cepUtil && cepUtil.openURLInDefaultBrowser) cepUtil.openURLInDefaultBrowser(url);
     else window.open(url);
 }
-document.querySelectorAll("[data-url]").forEach(function (b) { b.addEventListener("click", function () { openUrl(b.dataset.url); }); });
+$("creditLink").addEventListener("click", function () { openUrl(REPO_URL); });
 
-// The version shown in the menu comes from the manifest, the same source the installer and the .zip use.
+// The version shown in the menu comes from the manifest, the same source the installer and the .zip use,
+// so every release only has to bump CSXS/manifest.xml.
+var REPO_URL = "https://github.com/Adraff/Sheeets", VERSION = "";
 function loadVersion() {
     var x = new XMLHttpRequest();
     x.open("GET", "CSXS/manifest.xml");
-    x.onload = function () { var m = /ExtensionBundleVersion="([^"]+)"/.exec(x.responseText || ""); $("version").textContent = m ? m[1] : ""; };
+    x.onload = function () { var m = /ExtensionBundleVersion="([^"]+)"/.exec(x.responseText || ""); VERSION = m ? m[1] : ""; $("version").textContent = VERSION; };
     x.send();
 }
+
+function newerThan(a, b) {  // "0.10.0" > "0.9.1"
+    var x = a.split("."), y = b.split(".");
+    for (var i = 0; i < Math.max(x.length, y.length); i++) { var d = (+x[i] || 0) - (+y[i] || 0); if (d) return d > 0; }
+    return false;
+}
+
+// Compares with the latest GitHub release; a newer one opens its page to download.
+var latestUrl = null;
+$("checkUpd").addEventListener("click", function () {
+    if (latestUrl) return openUrl(latestUrl);
+    var msg = $("updMsg"), x = new XMLHttpRequest();
+    msg.className = "busy"; msg.textContent = t("Buscando…");
+    x.open("GET", "https://api.github.com/repos/Adraff/Sheeets/releases/latest");
+    x.timeout = 15000;
+    x.onload = function () {
+        var r = null;
+        try { r = JSON.parse(x.responseText); } catch (e) { /* handled below */ }
+        if (x.status !== 200 || !r || !r.tag_name) { msg.className = "bad"; msg.textContent = t("No se pudo consultar GitHub. Probá más tarde."); return; }
+        var latest = r.tag_name.replace(/^v/, "");
+        if (newerThan(latest, VERSION)) {
+            latestUrl = r.html_url;
+            msg.className = "good"; msg.textContent = t("Hay una versión nueva: %1.", latest);
+            $("checkUpd").textContent = t("Descargar %1", latest);
+        } else { msg.className = "good"; msg.textContent = t("Tenés la última versión."); }
+    };
+    x.onerror = x.ontimeout = function () { msg.className = "bad"; msg.textContent = t("No se pudo consultar GitHub. Probá más tarde."); };
+    x.send();
+});
 
 // Adobe Clean, Illustrator's UI typeface, is loaded from Illustrator's own install (never shipped with the plugin).
 // Windows: <app>\Support Files\Contents\Windows\Illustrator.exe -> <app>\Support Files\Required\UxpResources\AdobeCleanUX.

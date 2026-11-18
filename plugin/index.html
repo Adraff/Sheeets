@@ -93,10 +93,29 @@
   .warn:empty { display: none; }
 
   /* variable editor */
-  .editor { margin-top: 4px; padding: 6px 8px 8px; background: var(--card); border-radius: 3px; }
-  .editor label { display: block; margin: 6px 0 2px; color: var(--muted); font-size: 11px; }
+  .editor { }
+  #varTitle { text-transform: none; font-size: 13px; letter-spacing: 0; }
+  #varDlg { overflow-y: auto; }  /* the overlay scrolls, so the font list isn't clipped by the card */
+  .row2 { display: flex; gap: 6px; align-items: flex-end; }
+  .row2 > label { flex: 1; min-width: 0; }
+  .row2 > label.grow { flex: 1.7; }
+  .row2 > label.variant { flex: 1; }
+  .row2 > label.color-field { flex: 0 0 auto; }
+  .swatch-row { display: flex; align-items: center; gap: 2px; height: 24px; margin-top: 4px; }
+  /* only the square is visible: no native color input behind it */
+  .swatch { width: 24px; height: 24px; padding: 0; border: 1px solid var(--line); border-radius: 1px; cursor: pointer; }
+  .swatch.none { background: linear-gradient(to top right, transparent calc(50% - 1.2px), #e3262b calc(50% - 1.2px), #e3262b calc(50% + 1.2px), transparent calc(50% + 1.2px)), #fff; }
+  .swatch-clear { padding: 2px; }
+  .swatch-clear .ico { width: 9px; height: 9px; }
+  /* labels look like the panel's section titles */
+  .editor label { display: block; margin: 10px 0 0; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+  .editor label > input, .editor label > select { display: block; }
+  .editor > label:first-child { margin-top: 0; }
+  .editor label > * { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .editor .preview { margin-top: 4px; background: var(--field); }
+  .reset-link { display: block; margin: 12px 0 0 auto; font-size: 12px; }
   .editor label.inline { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--fg); font-size: 12px; }
-  .editor input, .editor select { width: 100%; height: 24px; padding: 2px 6px; margin-top: 2px; background: var(--field); border: 1px solid transparent; border-radius: 2px; }
+  .editor input, .editor select { width: 100%; height: 24px; padding: 2px 6px; margin-top: 4px; background: var(--field); border: 1px solid transparent; border-radius: 2px; }
   .editor input:focus, .editor select:focus, #linkInput:focus { outline: none; border-color: var(--accent); }
   .editor input[type=checkbox] { width: auto; height: auto; margin: 0; }
   .editor input[type=color] { width: 36px; height: 20px; padding: 0; margin: 0; }
@@ -167,7 +186,8 @@
   #pasteBtn .ico { width: 11px; height: 15px; }
   #linkVerify { margin-top: 12px; }
   #linkMsg { min-height: 1.4em; margin-top: 10px; font-weight: 700; }
-  #linkMsg.good { color: var(--ok); } #linkMsg.bad { color: var(--err); } #linkMsg.busy { color: var(--muted); font-weight: 400; }
+  #linkMsg.good, #updMsg.good { color: var(--ok); } #linkMsg.bad, #updMsg.bad { color: var(--err); } #linkMsg.busy, #updMsg.busy { color: var(--muted); font-weight: 400; }
+  #updMsg { margin-top: 6px; }
   .seg { display: flex; gap: 6px; }
   .seg button { flex: 1; height: 24px; border: 0; border-radius: 1px; background: var(--field); color: var(--strong); }
   .seg button.active { background: var(--accent); color: #fff; }
@@ -214,7 +234,7 @@
         <div id="vars"></div>
 
         <h2 data-i18n="Formato de línea">Formato de línea</h2>
-        <div id="tpl" contenteditable="true" spellcheck="false" role="textbox" aria-label="Formato de línea" data-placeholder="{Nombre} cumple el {Fecha}" data-i18n-ph="{Nombre} cumple el {Fecha}"></div>
+        <div id="tpl" contenteditable="true" spellcheck="false" role="textbox" aria-label="Formato de línea" data-placeholder="{variable1} | {variable2}" data-i18n-ph="{variable1} | {variable2}"></div>
         <div id="chips"></div>
 
         <div class="actions">
@@ -281,6 +301,15 @@
     </div>
   </div>
 
+  <!-- ===== variable format popup ===== -->
+  <div id="varDlg" class="overlay" hidden>
+    <button id="varClose" class="icon-btn close" title="Cerrar" data-i18n-title="Cerrar"><i class="ico i-cross"></i></button>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="varTitle">
+      <h2 id="varTitle"></h2>
+      <div id="varBody"></div>
+    </div>
+  </div>
+
   <!-- ===== menu ===== -->
   <div id="menu" class="overlay" hidden>
     <button id="menuClose" class="icon-btn close" title="Cerrar" data-i18n-title="Cerrar"><i class="ico i-cross"></i></button>
@@ -288,10 +317,11 @@
       <h2 data-i18n="Idioma">Idioma</h2>
       <div class="seg" role="group"><button data-lang="es" data-i18n="Español">Español</button><button data-lang="en" data-i18n="Inglés">Inglés</button></div>
       <h2 data-i18n="Créditos">Créditos</h2>
-      <div class="credit"><span>Adraff</span><button class="link" data-url="https://github.com/Adraff/Sheeets">www.github.com/Adraff/Sheeets</button></div>
+      <div class="credit"><span>Adraff</span><button id="creditLink" class="link">www.github.com/Adraff/Sheeets</button></div>
       <h2 data-i18n="Versión">Versión</h2>
       <div id="version"></div>
-      <button id="checkUpd" data-url="https://github.com/Adraff/Sheeets/releases" data-i18n="Buscar actualizaciones">Buscar actualizaciones</button>
+      <button id="checkUpd" data-i18n="Buscar actualizaciones">Buscar actualizaciones</button>
+      <div id="updMsg" aria-live="polite"></div>
     </div>
   </div>
 

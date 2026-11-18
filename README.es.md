@@ -72,7 +72,7 @@ El panel tiene dos pestañas abajo:
 - **Parámetros:** enlace, hoja, variables, formato de línea y botones.
 - **Tabla:** documento, hoja, límites (desde/hasta qué fila) y vista previa de la hoja.
 
-El menú **⋯** de arriba a la derecha tiene el **idioma** (español o inglés; por defecto, el de Illustrator), los créditos, la versión y **Buscar actualizaciones**.
+El menú **⋯** de arriba a la derecha tiene el **idioma** (español o inglés; por defecto, el de Illustrator), los créditos, la versión instalada y **Buscar actualizaciones**, que compara con la última versión publicada en GitHub y, si hay una nueva, te lleva a descargarla.
 
 ### 1. Enlazar una hoja
 Cada caja tiene **su propio enlace**: una caja puede usar una hoja y otra caja otra distinta.
@@ -91,13 +91,16 @@ La **fila 1** de la hoja son los nombres de las variables. Las columnas y filas 
 Por defecto no se aplica **ningún** formato: el texto sale con la configuración de Illustrator, o con la del texto que convertiste. Si cambiás el tamaño o la fuente de toda la caja en Illustrator, se mantiene al actualizar.
 
 Cada variable muestra su primer valor con el formato que tiene. Si querés que una columna se vea distinta, apretá el **lápiz** de esa variable:
-- **Atributos directos**: tipografía (escribí para buscar), estilo (Bold, Light…), tamaño, color, interletra y desplazamiento de línea base. Un campo vacío deja ese atributo como el de la caja.
-- **Estilo de carácter**: usa un estilo de carácter del documento.
-- **Alias**: otro nombre para usar en la plantilla, por ejemplo `{F}` en vez de `{Fecha}`.
-- **Quitar formato**: vuelve a dejar la variable como el resto de la caja.
+se abre una ventana con una **vista previa** de cómo va a verse el texto y:
+- **Tipografía** (escribí para buscar) y, a la derecha, su variante (Bold, Light…).
+- **Tamaño**, **Interletra** y **Color**. El cuadrado de color arranca como la muestra "ninguno" de Illustrator (blanco tachado en rojo); hacé clic para elegir un color con el selector de Illustrator, y con la **×** de al lado lo quitás.
+- **Desplazamiento de línea base**.
+- **Eliminar formato**: vuelve a dejar la variable como el resto de la caja.
+
+Un campo vacío deja ese atributo como el de la caja. Los cambios se aplican al momento; la ventana se cierra con la **×** o haciendo clic afuera.
 
 ### 3. Crear una caja
-1. Escribí el **Formato de línea**, por ejemplo `{Fecha} {Nombre}`. Los botones de colores con los nombres de las variables las insertan en el cursor. Entre variables podés poner texto fijo: `{Fecha} – {Nombre}`.
+1. Al enlazar una hoja, el **Formato de línea** se completa con todas las variables separadas por `|` (por ejemplo `{Fecha} | {Nombre}`); cada variable se ve con su color. Cambialo como quieras, por ejemplo `{Fecha} {Nombre}`. Los botones de colores con los nombres de las variables las insertan en el cursor. Entre variables podés poner texto fijo: `{Fecha} – {Nombre}`.
 2. En la pestaña **Tabla**, elegí los **Límites**: **Desde la fila** (2 = primera fila de datos) y **Hasta la fila** (**Todas** = hasta el final). Las flechas suben y bajan el número.
 3. Apretá **Nueva caja** para crearla en el centro de la vista. Si tenés seleccionado un texto común, aparece también **Convertir selección**, que lo transforma en caja enlazable.
 
@@ -192,6 +195,7 @@ Sheeets es software libre y gratuito, bajo la licencia **[GNU GPL v3](LICENSE)**
 - Podés usarlo, copiarlo, estudiarlo, modificarlo y compartirlo gratis, también en trabajos comerciales.
 - Si distribuís una versión modificada (o un producto que lo incluya), tiene que seguir siendo de código abierto bajo la misma licencia, con su código fuente disponible y manteniendo el aviso de autoría.
 - Se ofrece sin garantía.
+- **Excepción: los íconos y el logo** (todo lo que está en `plugin/img/`) **no** están bajo la GPL. Son © Adraff, todos los derechos reservados, y solo se pueden usar como parte de Sheeets, no en otros proyectos. Ver [LICENSE-ICONS.md](LICENSE-ICONS.md).
 
 ## Más documentación
 - [docs/PRUEBAS.md](docs/PRUEBAS.md): guía de pruebas manuales.

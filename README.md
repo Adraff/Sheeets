@@ -74,7 +74,7 @@ The panel has two tabs at the bottom:
 - **Parameters:** link, sheet, variables, line format and buttons.
 - **Table:** document, sheet, limits (from/to which row) and a preview of the sheet.
 
-The **⋯** menu at the top right has the **language** (English or Spanish; Illustrator's by default), credits, version and **Check for updates**.
+The **⋯** menu at the top right has the **language** (English or Spanish; Illustrator's by default), credits, the installed version and **Check for updates**, which compares it with the latest release on GitHub and, if there is a newer one, takes you to download it.
 
 ### 1. Link a sheet
 Every box has **its own link**: one box can use one sheet and another box a different one.
@@ -93,13 +93,16 @@ Row 1 of the sheet holds the variable names. Blank columns and blank rows are ig
 By default **no** formatting is applied: text uses Illustrator's settings, or the formatting of the text you converted. If you change the size or font of the whole box in Illustrator, it is kept on update.
 
 Each variable shows its first value with its current format. To make a column look different, press that variable's **pencil**:
-- **Direct attributes**: typeface (type to search), style (Bold, Light…), size, color, tracking and baseline shift. An empty field keeps the box's own value.
-- **Character style**: uses one of the document's character styles.
-- **Alias**: another name for the template, e.g. `{D}` instead of `{Date}`.
+a window opens with a **preview** of how the text will look, and:
+- **Typeface** (type to search) and, to its right, its style (Bold, Light…).
+- **Size**, **Tracking** and **Color**. The color square starts as Illustrator's "none" swatch (white with a red slash); click it to choose a color with Illustrator's color picker, and press the **×** next to it to remove the color.
+- **Baseline shift**.
 - **Clear format**: back to the box's own formatting.
 
+An empty field keeps the box's own value. Changes apply as you make them; close the window with the **×** or by clicking outside it.
+
 ### 3. Create a box
-1. Write the **Line format**, e.g. `{Date} {Name}`. The colored variable buttons insert a token at the cursor. You can put fixed text between variables: `{Date} – {Name}`.
+1. When you link a sheet, the **Line format** is filled with every variable separated by `|` (e.g. `{Date} | {Name}`); each variable shows in its color. Change it as you like, e.g. `{Date} {Name}`. The colored variable buttons insert a token at the cursor. You can put fixed text between variables: `{Date} – {Name}`.
 2. In the **Table** tab, set the **Limits**: **From row** (2 = first data row) and **To row** (**All** = to the end). The arrows step the number up and down.
 3. Press **New box** to create it in the center of the view. With plain text selected, **Convert selection** also appears and turns that text into a linked box.
 
@@ -194,6 +197,7 @@ Sheeets is free and open-source software under the **[GNU GPL v3](LICENSE)**. ©
 - You can use, copy, study, modify and share it for free, including for commercial work.
 - If you distribute a modified version (or a product that includes it), it must stay open source under the same license, with its source code available and the copyright notice kept.
 - It comes with no warranty.
+- **Exception: the icons and the logo** (everything in `plugin/img/`) are **not** under the GPL. They are © Adraff, all rights reserved, and may only be used as part of Sheeets, not in any other project. See [LICENSE-ICONS.md](LICENSE-ICONS.md).
 
 ## More documentation (Spanish)
 - [docs/PRUEBAS.md](docs/PRUEBAS.md): manual test guide.

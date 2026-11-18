@@ -43,8 +43,8 @@ Cada prueba dice qué hacer y qué tiene que pasar. Marcá ✔ o ✘.
 | C1 | Fecha → Editar → una tipografía con Bold → Bold, 24 | La muestra se ve en Bold 24 |
 | C2 | Nombre → Editar → la misma tipografía → Light, 24 | La muestra se ve en Light 24 |
 | C3 | Tamaño `abc` | "El tamaño tiene que ser un número entre 0,1 y 1296." |
-| C4 | Formato → Estilo de carácter → elegir uno | La muestra dice "(estilo: …)" |
-| C5 | Alias de Fecha: `F` | El botón de la plantilla pasa a decir `{F}` |
+| C4 | Lápiz → clic en el cuadrado de color tachado | Se abre el selector de color de Illustrator. Al aceptar, el cuadrado toma ese color |
+| C5 | Clic en la × al lado del color | El cuadrado vuelve a blanco tachado en rojo y la variable usa el color de la caja |
 | C6 | Abrir el `.ai` en una computadora sin esa fuente | Aviso "Falta la fuente … en esta computadora" |
 
 ## D. Caja (criterio de aceptación principal)
