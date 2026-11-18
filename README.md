@@ -96,13 +96,12 @@ Each variable shows its first value with its current format. To make a column lo
 a window opens with a **preview** of how the text will look, and:
 - **Typeface** (type to search) and, to its right, its style (Bold, Light…).
 - **Size**, **Tracking** and **Color**. The color square starts as Illustrator's "none" swatch (white with a red slash); click it to choose a color with Illustrator's color picker, and press the **×** next to it to remove the color.
-- **Baseline shift**.
 - **Clear format**: back to the box's own formatting.
 
 An empty field keeps the box's own value. Changes apply as you make them; close the window with the **×** or by clicking outside it.
 
 ### 3. Create a box
-1. When you link a sheet, the **Line format** is filled with every variable separated by `|` (e.g. `{Date} | {Name}`); each variable shows in its color. Change it as you like, e.g. `{Date} {Name}`. The colored variable buttons insert a token at the cursor. You can put fixed text between variables: `{Date} – {Name}`.
+1. Write the **Line format**, e.g. `{Date} | {Name}`. It starts empty; each variable shows in its color. The colored variable buttons insert a token at the cursor. You can put fixed text between variables: `{Date} – {Name}`.
 2. In the **Table** tab, set the **Limits**: **From row** (2 = first data row) and **To row** (**All** = to the end). The arrows step the number up and down.
 3. Press **New box** to create it in the center of the view. With plain text selected, **Convert selection** also appears and turns that text into a linked box.
 

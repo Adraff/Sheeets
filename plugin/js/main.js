@@ -204,6 +204,8 @@ function setLinkMsg(text, kind) {
     $("linkMsg").textContent = text;
     $("linkMsg").className = kind || "";
     $("linkInput").className = kind === "bad" || kind === "good" ? kind : "";
+    // "Verificar" is grayed out and can't be pressed while a link is being checked (and once it's verified).
+    $("linkVerify").disabled = kind === "checking" || kind === "good";
 }
 
 function openLinkDialog() {
@@ -225,7 +227,7 @@ function verifyLink() {
     var text = $("linkInput").value.trim(), seq = ++verifySeq, src = parseSheetUrl(text);
     if (!text) return setLinkMsg("", "");
     if (!src) return setLinkMsg("✗ " + t("El enlace no parece de Google Sheets. Copialo desde la barra de direcciones de la hoja."), "bad");
-    setLinkMsg(t("Verificando…"), "busy");
+    setLinkMsg(t("Verificando…"), "checking");
     fetchSheetMeta(src, function (err, meta) {
         if (seq !== verifySeq) return;  // another link was typed meanwhile
         if (err) return setLinkMsg("✗ " + err, "bad");
@@ -259,11 +261,6 @@ function readClipboard(cb) {
 // New link or sheet for the current config. A selected box only changes when "Actualizar caja" is pressed.
 function setSource(src) {
     cur.source = src;
-    // A new box starts with every variable in its line format: "{A} | {B} | {C}".
-    var data = sheetData(src);
-    if (!isBox() && !cur.template.trim() && data) {
-        cur.template = varsOf(cur, data.rows).map(function (v) { return "{" + (v.alias || v.name) + "}"; }).join(" | ");
-    }
     changed();
     renderAll();
     if (isBox()) setStatus(t("Hoja cambiada: apretá «Actualizar caja» para aplicarla a la caja."), "warn");
@@ -492,7 +489,6 @@ function buildEditor(fmt, sampleText, onChange) {
 
     var size = el("input", { value: fmt.size == null ? "" : fmt.size, placeholder: t("auto"), inputMode: "decimal" });
     var tracking = el("input", { value: fmt.tracking == null ? "" : fmt.tracking, placeholder: t("auto"), inputMode: "decimal" });
-    var baseline = el("input", { value: fmt.baseline == null ? "" : fmt.baseline, placeholder: t("(como la caja)"), inputMode: "decimal" });
 
     // Color: a swatch only. No color = Illustrator's "none" swatch (white, red slash); a click opens Illustrator's picker.
     var swatch = el("button", { className: "swatch" });
@@ -537,23 +533,22 @@ function buildEditor(fmt, sampleText, onChange) {
             else if (family.value.trim()) return;  // still typing a family name: wait for a match
         }
         var problems = [];
-        var sz = num(size), tr = num(tracking), bl = num(baseline);
+        var sz = num(size), tr = num(tracking);
         if (size.value.trim() && (sz === null || sz <= 0 || sz > 1296)) { problems.push(t("El tamaño tiene que ser un número entre 0,1 y 1296.")); sz = fmt.size; }
         if (tracking.value.trim() && (tr === null || tr < -1000 || tr > 10000)) { problems.push(t("La interletra tiene que estar entre -1000 y 10000.")); tr = fmt.tracking; }
-        if (baseline.value.trim() && bl === null) { problems.push(t("El desplazamiento de línea base tiene que ser un número.")); bl = fmt.baseline; }
 
         fmt.mode = "direct";  // the popup only edits direct attributes (a stored character style is left unused)
         var f = familyMatch() ? fontByName[style.value] : null;
         if (!family.value.trim()) { fmt.font = fmt.family = fmt.style = null; }
         else if (f) { fmt.font = f.name; fmt.family = f.family; fmt.style = f.style; }
         // else: a font missing on this machine stays as stored
-        fmt.size = sz; fmt.tracking = tr; fmt.baseline = bl;
+        fmt.size = sz; fmt.tracking = tr;  // baseline shift is no longer editable; a stored one stays until "Eliminar formato"
         problemsBox.textContent = problems.join(" ");
         showPreview();
         onChange();
         changed();
     }
-    [family, style, size, tracking, baseline].forEach(function (i) {
+    [family, style, size, tracking].forEach(function (i) {
         i.addEventListener(i.tagName === "SELECT" ? "change" : "input", commit);
     });
     showColor();
@@ -563,7 +558,6 @@ function buildEditor(fmt, sampleText, onChange) {
         field(t("Vista previa"), previewBox),
         el("div", { className: "row2" }, [field(t("Tipografía"), familyBox, "grow"), field(t("Variante"), style, "variant")]),
         el("div", { className: "row2" }, [field(t("Tamaño"), size), field(t("Interletra"), tracking), field(t("Color"), colorBox, "color-field")]),
-        field(t("Desplazamiento de línea base (pt)"), baseline),
         problemsBox, reset
     ]);
 }

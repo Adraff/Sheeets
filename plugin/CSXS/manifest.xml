@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.sheeets.linkedtext" ExtensionBundleVersion="0.4.0" ExtensionBundleName="Sheeets" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.sheeets.linkedtext" ExtensionBundleVersion="0.4.1" ExtensionBundleName="Sheeets" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.sheeets.linkedtext.panel" Version="0.4.0"/>
+    <Extension Id="com.sheeets.linkedtext.panel" Version="0.4.1"/>
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>

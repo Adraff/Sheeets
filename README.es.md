@@ -94,13 +94,12 @@ Cada variable muestra su primer valor con el formato que tiene. Si querés que u
 se abre una ventana con una **vista previa** de cómo va a verse el texto y:
 - **Tipografía** (escribí para buscar) y, a la derecha, su variante (Bold, Light…).
 - **Tamaño**, **Interletra** y **Color**. El cuadrado de color arranca como la muestra "ninguno" de Illustrator (blanco tachado en rojo); hacé clic para elegir un color con el selector de Illustrator, y con la **×** de al lado lo quitás.
-- **Desplazamiento de línea base**.
 - **Eliminar formato**: vuelve a dejar la variable como el resto de la caja.
 
 Un campo vacío deja ese atributo como el de la caja. Los cambios se aplican al momento; la ventana se cierra con la **×** o haciendo clic afuera.
 
 ### 3. Crear una caja
-1. Al enlazar una hoja, el **Formato de línea** se completa con todas las variables separadas por `|` (por ejemplo `{Fecha} | {Nombre}`); cada variable se ve con su color. Cambialo como quieras, por ejemplo `{Fecha} {Nombre}`. Los botones de colores con los nombres de las variables las insertan en el cursor. Entre variables podés poner texto fijo: `{Fecha} – {Nombre}`.
+1. Escribí el **Formato de línea**, por ejemplo `{Fecha} | {Nombre}`. Arranca vacío; cada variable se ve con su color. Los botones de colores con los nombres de las variables las insertan en el cursor. Entre variables podés poner texto fijo: `{Fecha} – {Nombre}`.
 2. En la pestaña **Tabla**, elegí los **Límites**: **Desde la fila** (2 = primera fila de datos) y **Hasta la fila** (**Todas** = hasta el final). Las flechas suben y bajan el número.
 3. Apretá **Nueva caja** para crearla en el centro de la vista. Si tenés seleccionado un texto común, aparece también **Convertir selección**, que lo transforma en caja enlazable.
 
