@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Sheeets</title>
+<style>
+  :root { --bg: #323232; --fg: #e6e6e6; --muted: #9a9a9a; --field: #262626; --line: #4a4a4a; --accent: #378ef0; --err: #f27474; --ok: #6fcf97; --warn: #f2c94c; }
+  :root.light { --bg: #f0f0f0; --fg: #222; --muted: #666; --field: #fff; --line: #ccc; --err: #c62828; --ok: #2e7d32; --warn: #a15c00; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; padding: 8px; background: var(--bg); color: var(--fg); font: 12px/1.4 system-ui, "Segoe UI", sans-serif; }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 6px; }
+  h3 { font-size: 13px; margin: 0 0 8px; }
+  input { width: 100%; padding: 4px 6px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 3px; font: inherit; }
+  input.good { border-color: var(--ok); } input.bad { border-color: var(--err); }
+  select { width: 100%; padding: 3px 4px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 3px; font: inherit; }
+  input[type=checkbox], input[type=color] { width: auto; padding: 0; vertical-align: middle; }
+  input[type=color] { height: 20px; width: 36px; }
+  label { display: block; color: var(--muted); margin: 6px 0 2px; }
+  label.inline { display: flex; align-items: center; gap: 4px; margin-top: 8px; color: var(--fg); }
+  label > input, label > select { margin-top: 2px; }
+  .row { display: flex; gap: 6px; margin-top: 6px; }
+  .row label { flex: 1; margin-top: 0; }
+  button { flex: 1; padding: 5px 8px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 3px; font: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  button.wide { display: block; width: 100%; margin-top: 6px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #linkBtn.primary { text-align: center; }
+  #linkBtn.linked { font-weight: 600; }
+  .sheet-list { margin-top: 4px; border: 1px solid var(--line); border-radius: 3px; max-height: 200px; overflow: auto; }
+  .sheet-item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+  .sheet-item:last-child { border-bottom: 0; }
+  .sheet-item.current { font-weight: 600; }
+  .muted { color: var(--muted); }
+  .bad { color: var(--err); } .good { color: var(--ok); } .busy { color: var(--muted); }
+  #status { position: sticky; bottom: 0; margin: 10px -8px -8px; padding: 6px 8px; background: var(--bg); border-top: 1px solid var(--line); white-space: pre-line; }
+  #status:empty { display: none; }
+  #status.error { color: var(--err); } #status.ok { color: var(--ok); } #status.warn { color: var(--warn); }
+  #chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  #chips button { flex: 0 0 auto; padding: 1px 6px; font-size: 11px; }
+  #confirm { margin-top: 8px; padding: 8px; border: 1px solid var(--warn); border-radius: 3px; color: var(--warn); }
+  .var { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .var-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .var-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .var-head button { flex: 0 0 auto; padding: 2px 8px; }
+  .sample { margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+  .sample.approx::after { content: "  · " attr(data-approx); color: var(--muted); font: 11px system-ui, "Segoe UI", sans-serif; letter-spacing: 0; }
+  .warn { color: var(--warn); }
+  .warn:empty { display: none; }
+  .editor { margin-top: 6px; padding: 6px 8px 8px; border: 1px solid var(--line); border-radius: 3px; }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 3px 6px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+  th { color: var(--muted); font-weight: 600; }
+  .overlay { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(0, 0, 0, .55); }
+  .dialog { width: 100%; max-width: 380px; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
+  .input-row { display: flex; gap: 6px; }
+  .input-row button { flex: 0 0 auto; }
+  #linkMsg { min-height: 1.4em; margin-top: 8px; }
+  .top { display: flex; align-items: flex-start; gap: 8px; }
+  .top #sel { flex: 1; }
+  .lang { display: flex; flex: 0 0 auto; }
+  .lang button { flex: 0 0 auto; padding: 1px 6px; font-size: 10px; border-radius: 0; }
+  .lang button:first-child { border-radius: 3px 0 0 3px; } .lang button:last-child { border-radius: 0 3px 3px 0; border-left: 0; }
+  .lang button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #loading { z-index: 20; flex-direction: column; gap: 10px; color: #fff; }
+  .spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div id="sel" class="muted"></div>
+    <div class="lang" role="group" aria-label="Idioma / Language"><button data-lang="es">ES</button><button data-lang="en">EN</button></div>
+  </div>
+
+  <h2 data-i18n="Hoja de datos">Hoja de datos</h2>
+  <button id="linkBtn" class="wide primary">Enlazar</button>
+  <button id="sheetBtn" class="wide" hidden></button>
+  <div id="sheetList" class="sheet-list" hidden></div>
+  <div id="fetched" class="muted"></div>
+
+  <h2 data-i18n="Variables">Variables</h2>
+  <div id="vars"></div>
+
+  <h2 data-i18n="Caja">Caja</h2>
+  <label for="tpl" data-i18n="Plantilla (se repite una línea por fila)">Plantilla (se repite una línea por fila)</label>
+  <input id="tpl" placeholder="{Fecha} {Nombre}">
+  <div id="chips"></div>
+  <div class="row">
+    <label><span data-i18n="Desde fila">Desde fila</span><input id="from" placeholder="2" inputmode="numeric"></label>
+    <label><span data-i18n="Hasta fila">Hasta fila</span><input id="to" placeholder="todas" data-i18n-ph="todas" inputmode="numeric"></label>
+  </div>
+  <div class="row">
+    <button id="newBox" class="primary" data-i18n="Nueva caja">Nueva caja</button>
+    <button id="convert" data-i18n="Convertir selección">Convertir selección</button>
+  </div>
+  <div class="row">
+    <button id="updBox" data-i18n="Actualizar caja">Actualizar caja</button>
+    <button id="updAll" data-i18n="Actualizar todas">Actualizar todas</button>
+  </div>
+  <div class="row">
+    <button id="toggle">Ver plantilla</button>
+  </div>
+  <div id="confirm" hidden>
+    <div id="confirmMsg"></div>
+    <div class="row">
+      <button id="confirmYes" class="primary" data-i18n="Reemplazar">Reemplazar</button>
+      <button id="confirmNo" data-i18n="Cancelar">Cancelar</button>
+    </div>
+  </div>
+
+  <h2 data-i18n="Vista previa de la hoja">Vista previa de la hoja</h2>
+  <div id="count" class="muted"></div>
+  <div class="scroll"><table id="preview"></table></div>
+
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <div id="linkDlg" class="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="linkTitle">
+      <h3 id="linkTitle" data-i18n="Enlazar hoja de Google Sheets">Enlazar hoja de Google Sheets</h3>
+      <div class="input-row">
+        <input id="linkInput" placeholder="Pegá el enlace de la hoja" data-i18n-ph="Pegá el enlace de la hoja" aria-label="Google Sheets">
+        <button id="pasteBtn" data-i18n="Pegar">Pegar</button>
+      </div>
+      <div id="linkMsg" aria-live="polite"></div>
+      <div class="row">
+        <button id="linkCancel" data-i18n="Cancelar">Cancelar</button>
+        <button id="linkVerify" class="primary" data-i18n="Verificar">Verificar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" class="overlay" hidden aria-live="polite"><div class="spinner"></div><div id="loadingText"></div></div>
+  <datalist id="fontFamilies"></datalist>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/csv.js"></script>
+  <script src="js/sheets.js"></script>
+  <script src="js/template.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

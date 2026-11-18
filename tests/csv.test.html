@@ -1,0 +1,63 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>CSV tests</title>
+<pre id="out"></pre>
+<script src="../plugin/js/i18n.js"></script>
+<script src="../plugin/js/csv.js"></script>
+<script src="../plugin/js/sheets.js"></script>
+<script src="../plugin/js/template.js"></script>
+<script>
+var results = [], fails = 0;
+function eq(name, got, want) {
+    var ok = JSON.stringify(got) === JSON.stringify(want);
+    if (!ok) fails++;
+    results.push((ok ? "PASS " : "FAIL ") + name + (ok ? "" : "\n  got:  " + JSON.stringify(got) + "\n  want: " + JSON.stringify(want)));
+}
+eq("simple", parseCsv("Fecha,Nombre\n24 de Marzo,Ana Perez\n"), [["Fecha", "Nombre"], ["24 de Marzo", "Ana Perez"]]);
+eq("crlf + bom", parseCsv("﻿a,b\r\nc,d"), [["a", "b"], ["c", "d"]]);
+eq("quotes, commas, newline in cell", parseCsv('a,"b, ""c""\nd"\n'), [["a", 'b, "c"\nd']]);
+eq("empty cells", parseCsv("a,,c\n,,\n"), [["a", "", "c"], ["", "", ""]]);
+eq("accents and emoji", parseCsv("ñandú,Gómez 😀"), [["ñandú", "Gómez 😀"]]);
+eq("empty text", parseCsv(""), []);
+eq("headers", headersToVariables(["Fecha", "", "Fecha", " Nombre "]).map(function (v) { return v.name; }), ["Fecha", "Columna 2", "Fecha 2", "Nombre"]);
+eq("url edit link", parseSheetUrl("https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit#gid=123"), { id: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms", gid: "123", published: false });
+eq("url ?gid", parseSheetUrl("https://docs.google.com/spreadsheets/d/abcdefghijklmnopqrstuvwxyz12/edit?usp=sharing&gid=5"), { id: "abcdefghijklmnopqrstuvwxyz12", gid: "5", published: false });
+eq("raw id", parseSheetUrl("  abcdefghijklmnopqrstuvwxyz12 "), { id: "abcdefghijklmnopqrstuvwxyz12", gid: "0", published: false });
+eq("published", parseSheetUrl("https://docs.google.com/spreadsheets/d/e/2PACX-1vABC_def-123/pubhtml?gid=7"), { id: "2PACX-1vABC_def-123", gid: "7", published: true });
+eq("invalid", parseSheetUrl("https://example.com/hola"), null);
+// --- sheet meta ---
+var html1 = '<html><head><title>Agenda &amp; Fechas - Google Drive</title></head><scr' + 'ipt>var items = [];items.push({name: "Hoja 1", pageUrl: "https:\\/\\/x\\/htmlview\\/sheet?headers\\x3dtrue&gid=0", gid: "0",initialSheet: true});items.push({name: "Ma\\u00f1ana \\x22B\\x22", pageUrl: "u", gid: "1742",initialSheet: false});<\/script>';
+eq("meta htmlview", parseSheetMeta(html1), { title: "Agenda & Fechas", sheets: [{ gid: "0", name: "Hoja 1" }, { gid: "1742", name: 'Mañana "B"' }] });
+var html2 = '<title>Publicada</title><ul><li id="sheet-button-0"><a href="#">Datos</a></li><li id="sheet-button-55"><a href="#">Otra &amp; más</a></li></ul>';
+eq("meta pubhtml", parseSheetMeta(html2), { title: "Publicada", sheets: [{ gid: "0", name: "Datos" }, { gid: "55", name: "Otra & más" }] });
+eq("meta login page", parseSheetMeta("<title>Iniciar sesión</title><form></form>").sheets, []);
+
+// --- template ---
+var V = [{ name: "Fecha", column: 0 }, { name: "Nombre", column: 1, alias: "N" }];
+var sheet = [["Fecha", "Nombre"], ["24 de Marzo", "Ana Perez"], ["", ""], ["27 de Marzo", "Luis\nGomez"], ["13 de Abril", "Juan Diaz"]];
+eq("tpl ok", parseTemplate("{Fecha} - {n}", V).segments.length, 3);
+eq("tpl unknown", parseTemplate("{Fecha} {Edad}", V).error, "La variable {Edad} no existe en la hoja.");
+eq("tpl unclosed", parseTemplate("{Fecha {Nombre}", V).error, "Falta cerrar una llave { en la plantilla.");
+eq("tpl stray close", parseTemplate("Fecha} {Nombre}", V).error, "Hay una llave } sin abrir en la plantilla.");
+eq("tpl no vars", !!parseTemplate("hola", V).error, true);
+var segs = parseTemplate("{Fecha} {Nombre}", V).segments;
+var sp = buildSpec(sheet, segs, function (v) { return v.name; }, 2, 4);
+eq("spec contents", sp.contents, "24 de Marzo Ana Perez\r27 de Marzo Luis" + LINE_BREAK + "Gomez");
+eq("spec runs", sp.runs, [[0, 11, 0], [12, 15, 1], [28, 11, 0], [40, 14, 1]]);
+eq("spec formats", sp.formats, ["Fecha", "Nombre"]);
+eq("spec probe", sp.probe, 11);
+eq("spec warnings (blank rows are silent)", sp.warnings, []);
+eq("cleanRows", cleanRows([["Fecha", "", "Nombre", ""], ["1", "", "a", ""], ["", "", "", ""], ["2", "", "b", ""], ["", "", "", ""], [" ", "", "", ""]]),
+    [["Fecha", "Nombre"], ["1", "a"], ["", ""], ["2", "b"]]);
+eq("cleanRows keeps column with data but no header", cleanRows([["A", ""], ["1", "x"]]), [["A", ""], ["1", "x"]]);
+eq("i18n en", (function () { LANG = "en"; var r = t("La variable {%1} no existe en la hoja.", "X"); LANG = "es"; return r; })(), "The variable {X} doesn't exist in the sheet.");
+var sp2 = buildSpec(sheet, parseTemplate("{Nombre}", V).segments, function () { return 0; }, 5, 9);
+eq("spec range beyond", [sp2.contents, sp2.probe, sp2.warnings[0]], ["Juan Diaz", -1, "La hoja tiene datos hasta la fila 5: se muestran las filas 5 a 5."]);
+eq("spec from beyond", buildSpec(sheet, segs, function () { return 0; }, 9, null).rows, 0);
+eq("spec headers only", buildSpec([["Fecha", "Nombre"]], segs, function () { return 0; }, 2, null).warnings, ["La hoja no tiene filas de datos: la caja queda vacía."]);
+eq("hostFormat",hostFormat({ mode: "direct", font: "Arial-BoldMT", size: 24, color: "#cc0010" }), { font: "Arial-BoldMT", size: 24, color: [204, 0, 16], tracking: null, baseline: null });
+eq("hostFormat style", hostFormat({ mode: "style", charStyle: "Destacado" }), { style: "Destacado" });
+
+document.getElementById("out").textContent = (fails ? fails + " FAILED" : "ALL PASS") + "\n\n" + results.join("\n");
+document.title = fails ? "FAIL" : "PASS";
+</script>

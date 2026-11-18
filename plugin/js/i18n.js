@@ -1,0 +1,166 @@
+// Panel language: Spanish strings are the keys; EN holds the English text. %1, %2... are placeholders.
+// Default = Illustrator's UI language (Spanish for es_*, English otherwise); the ES/EN buttons override it.
+var LANG = "es";
+
+var EN = {
+    "%1 (%2 líneas).": "%1 (%2 lines).",
+    "%1 (1 línea).": "%1 (1 line).",
+    "%1 cajas actualizadas.": "%1 boxes updated.",
+    "%1 cajas tienen texto editado a mano.": "%1 boxes have text edited by hand.",
+    "%1 filas de datos": "%1 data rows",
+    "(como la caja)": "(same as the box)",
+    "(como la caja) · escribí para buscar": "(same as the box) · type to search",
+    "(elegí un estilo)": "(choose a style)",
+    "(falta) %1": "(missing) %1",
+    "(igual que la columna)": "(same as the column)",
+    "(no hay documento abierto)": "(no document open)",
+    "(se muestran las primeras %1)": "(showing the first %1)",
+    "«Hasta fila» tiene que ser mayor o igual que «Desde fila».": "“To row” must be greater than or equal to “From row”.",
+    "1 caja actualizada.": "1 box updated.",
+    "1 fila de datos": "1 data row",
+    "Abrí o creá un documento para guardar los datos en el archivo.": "Open or create a document to save the data in the file.",
+    "Abrí o creá un documento.": "Open or create a document.",
+    "actualizada %1": "updated %1",
+    "Actualizando…": "Updating…",
+    "Actualizando… con muchas filas puede tardar unos segundos.": "Updating… with many rows this can take a few seconds.",
+    "Actualizar caja": "Update box",
+    "Actualizar todas": "Update all",
+    "Alias (nombre en la plantilla)": "Alias (name in the template)",
+    "Atributos directos": "Direct attributes",
+    "Caja": "Box",
+    "Caja «%1» (%2): ": "Box “%1” (%2): ",
+    "Caja actualizada": "Box updated",
+    "Caja creada": "Box created",
+    "Caja enlazable seleccionada": "Linked box selected",
+    "Cambiar el enlace: %1": "Change the link: %1",
+    "cambios sin aplicar": "unapplied changes",
+    "Cancelar": "Cancel",
+    "Cargando hojas…": "Loading sheets…",
+    "Cargando…": "Loading…",
+    "Cerrar": "Close",
+    "Color propio": "Own color",
+    "Convertir selección": "Convert selection",
+    "Descargando datos…": "Downloading data…",
+    "Descargando la hoja «%1»…": "Downloading sheet “%1”…",
+    "Desde fila": "From row",
+    "desde la fila %1": "from row %1",
+    "Desplazamiento de línea base (pt)": "Baseline shift (pt)",
+    "editada a mano": "edited by hand",
+    "Editar": "Edit",
+    "El alias no puede tener llaves { }.": "The alias can't contain braces { }.",
+    "El desplazamiento de línea base tiene que ser un número.": "The baseline shift must be a number.",
+    "El enlace no parece de Google Sheets. Copialo desde la barra de direcciones de la hoja.": "This doesn't look like a Google Sheets link. Copy it from the sheet's address bar.",
+    "El estilo de carácter «%1» no existe en este documento.": "The character style “%1” doesn't exist in this document.",
+    "El rango empieza en la fila %1, pero la hoja tiene datos solo hasta la fila %2.": "The range starts at row %1, but the sheet only has data up to row %2.",
+    "El tamaño tiene que ser un número entre 0,1 y 1296.": "The size must be a number between 0.1 and 1296.",
+    "El texto de la caja fue editado a mano.": "The box's text was edited by hand.",
+    "El texto no entra en la caja: agrandala o achicá el texto.": "The text doesn't fit in the box: make the box bigger or the text smaller.",
+    "Enlazá una hoja para ver sus columnas.": "Link a sheet to see its columns.",
+    "Enlazar": "Link",
+    "Enlazar hoja de Google Sheets": "Link a Google Sheets sheet",
+    "Enlazar una hoja de Google Sheets": "Link a Google Sheets sheet",
+    "Error de Illustrator: %1": "Illustrator error: %1",
+    "Escribí una plantilla, por ejemplo {%1}.": "Write a template, for example {%1}.",
+    "Esta caja no tiene una hoja enlazada: apretá «Enlazar».": "This box has no linked sheet: press “Link”.",
+    "Esta caja se creó con una versión más nueva de Sheeets. Actualizá el plugin para modificarla.": "This box was made with a newer version of Sheeets. Update the plugin to change it.",
+    "Este documento no tiene cajas enlazables.": "This document has no linked boxes.",
+    "Este documento se guardó con una versión más nueva de Sheeets. Actualizá el plugin.": "This document was saved with a newer version of Sheeets. Update the plugin.",
+    "Estilo": "Style",
+    "Estilo de carácter": "Character style",
+    "Estilo de carácter de Illustrator": "Illustrator character style",
+    "estilo: %1": "style: %1",
+    "Falta cerrar una llave { en la plantilla.": "A brace { is not closed in the template.",
+    "Falta la fuente %1 en esta computadora. Instalala o elegí otra.": "The font %1 is missing on this computer. Install it or choose another one.",
+    "filas %1–%2": "rows %1–%2",
+    "Formato": "Format",
+    "Google respondió con un error (%1). Probá de nuevo.": "Google returned an error (%1). Try again.",
+    "Hasta fila": "To row",
+    "Hay una llave } sin abrir en la plantilla.": "There is a closing brace } without an opening one in the template.",
+    "Hay unas llaves vacías {} en la plantilla.": "There are empty braces {} in the template.",
+    "Hoja cambiada: apretá «Actualizar caja» para aplicarla a la caja.": "Sheet changed: press “Update box” to apply it to the box.",
+    "Hoja de datos": "Data sheet",
+    "Hoja de Google": "Google sheet",
+    "Hoja: %1": "Sheet: %1",
+    "Illustrator no pudo actualizar la caja.": "Illustrator couldn't update the box.",
+    "Insertar %1": "Insert %1",
+    "Interletra (milésimas de em)": "Tracking (thousandths of an em)",
+    "La caja está bloqueada u oculta: desbloqueala y mostrala para actualizarla.": "The box is locked or hidden: unlock and show it to update it.",
+    "La fila 1 son los encabezados: el rango empieza como mínimo en la fila 2.": "Row 1 holds the headers: the range starts at row 2 or later.",
+    "La hoja está vacía.": "The sheet is empty.",
+    'La hoja no es pública. En Google Sheets: Compartir → "Cualquier persona con el enlace" → Lector.': 'The sheet isn\'t public. In Google Sheets: Share → "Anyone with the link" → Viewer.',
+    "La hoja no tiene filas de datos: la caja queda vacía.": "The sheet has no data rows: the box stays empty.",
+    "La hoja solo tiene encabezados.": "The sheet only has headers.",
+    "La hoja tiene datos hasta la fila %1: se muestran las filas %2 a %3.": "The sheet has data up to row %1: showing rows %2 to %3.",
+    "La interletra tiene que estar entre -1000 y 10000.": "Tracking must be between -1000 and 10000.",
+    "La plantilla no usa ninguna variable. Agregá una, por ejemplo {%1}.": "The template uses no variable. Add one, for example {%1}.",
+    "La variable {%1} no existe en la hoja.": "The variable {%1} doesn't exist in the sheet.",
+    "Las filas tienen que ser números enteros.": "Rows must be whole numbers.",
+    "Los datos guardados en este documento están dañados: se vuelven a descargar al actualizar.": "The data saved in this document is damaged: it will be downloaded again on update.",
+    "mostrando la plantilla": "showing the template",
+    "Mostrando la plantilla.": "Showing the template.",
+    "Mostrando los datos.": "Showing the data.",
+    "ninguno": "none",
+    "No hay datos guardados de %1: actualizá con conexión a internet.": "No saved data for %1: update while connected to the internet.",
+    "No hay datos guardados de esta hoja: apretá «Actualizar caja».": "No saved data for this sheet: press “Update box”.",
+    "No se cambió nada.": "Nothing was changed.",
+    "No se encontró la caja en el documento.": "The box wasn't found in the document.",
+    "No se encontró la hoja. Revisá el enlace.": "The sheet wasn't found. Check the link.",
+    "No se encontró la pestaña (gid). Revisá el número de pestaña.": "The tab (gid) wasn't found. Check the tab number.",
+    "No se pudieron guardar los datos en el documento.": "The data couldn't be saved in the document.",
+    "No se pudieron leer las cajas del documento.": "The document's boxes couldn't be read.",
+    "No se pudo aplicar %1: no está en esta computadora o documento.": "Couldn't apply %1: it isn't on this computer or in this document.",
+    "No se pudo conectar con Google. Revisá tu conexión a internet.": "Couldn't connect to Google. Check your internet connection.",
+    "No se pudo leer el portapapeles: pegá con Ctrl+V (Cmd+V en Mac).": "Couldn't read the clipboard: paste with Ctrl+V (Cmd+V on Mac).",
+    "Nueva caja": "New box",
+    "Pegá el enlace de la hoja": "Paste the sheet's link",
+    "Pegar": "Paste",
+    "Plantilla (se repite una línea por fila)": "Template (one line repeated per row)",
+    "Quitar formato (como la caja)": "Clear format (same as the box)",
+    "Recargar estilos": "Reload styles",
+    "Reemplazar": "Replace",
+    "Se agotó el tiempo de espera. Probá de nuevo en un rato.": "The request timed out. Try again in a while.",
+    "Se usaron los datos guardados del %1.": "The data saved on %1 was used.",
+    "Si seguís, esos cambios se reemplazan por el contenido de la hoja.": "If you continue, those changes are replaced by the sheet's content.",
+    "Sin selección: enlazá una hoja y creá una caja nueva.": "Nothing selected: link a sheet and create a new box.",
+    "Tamaño (pt)": "Size (pt)",
+    "Texto común seleccionado: enlazá una hoja y convertilo.": "Plain text selected: link a sheet and convert it.",
+    "Texto convertido en caja enlazable": "Text converted into a linked box",
+    "Tipografía": "Typeface",
+    "todas": "all",
+    "Última descarga: %1": "Last download: %1",
+    "Variables": "Variables",
+    "Ver datos": "Show data",
+    "Ver plantilla": "Show template",
+    "Verificando…": "Checking…",
+    "Verificar": "Check",
+    "vista aproximada": "approximate preview",
+    "Vista previa de la hoja": "Sheet preview"
+};
+
+function t(s) {
+    var out = LANG === "en" && EN.hasOwnProperty(s) ? EN[s] : s;
+    for (var i = arguments.length - 1; i >= 1; i--) out = out.split("%" + i).join(arguments[i]);
+    return out;
+}
+
+function detectLang() {
+    try { var saved = localStorage.getItem("sheeets.lang"); if (saved === "es" || saved === "en") return saved; } catch (e) { /* storage unavailable */ }
+    try { return /^es/i.test(JSON.parse(window.__adobe_cep__.getHostEnvironment()).appUILocale) ? "es" : "en"; } catch (e) { return "es"; }
+}
+
+function setLang(lang) {
+    LANG = lang;
+    try { localStorage.setItem("sheeets.lang", lang); } catch (e) { /* storage unavailable */ }
+}
+
+// Static texts in index.html: data-i18n -> textContent, data-i18n-ph -> placeholder.
+function applyStaticText() {
+    document.documentElement.lang = LANG === "en" ? "en" : "es-AR";
+    document.querySelectorAll("[data-i18n]").forEach(function (n) { n.textContent = t(n.getAttribute("data-i18n")); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(function (n) { n.placeholder = t(n.getAttribute("data-i18n-ph")); });
+    document.querySelectorAll("[data-lang]").forEach(function (b) { b.classList.toggle("active", b.dataset.lang === LANG); });
+}
+
+LANG = window.__adobe_cep__ ? detectLang() : "es";  // tests (plain browser) run in Spanish
+
+if (typeof module !== "undefined") module.exports = { t: t, EN: EN };
