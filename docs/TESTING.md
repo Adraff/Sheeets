@@ -3,15 +3,15 @@
 Cada prueba dice qué hacer y qué tiene que pasar. Marcá ✔ o ✘.
 
 ## Preparación
-1. Instalá el plugin con `Instalar.bat` (Windows) o `Instalar.command` (macOS).
+1. Instalá el plugin con `Install.bat` (Windows) o `Install.command` (macOS).
 2. Creá una hoja de Google Sheets con este contenido y compartila como **Cualquier persona con el enlace → Lector**:
 
 | Fecha | Nombre |
 |---|---|
-| 24 de Marzo | Ana Perez |
-| 27 de Marzo | Luis Gomez |
-| 13 de Abril | Juan Diaz |
-| 16 de Mayo | Sofia Ruiz |
+| 24 de Marzo | Ana Pérez |
+| 27 de Marzo | Luis Gómez |
+| 13 de Abril | Juan Díaz |
+| 16 de Mayo | Sofía Ruiz |
 
 3. Abrí Illustrator, creá un documento nuevo y abrí **Ventana → Extensiones → Sheeets**.
 
@@ -52,8 +52,8 @@ Cada prueba dice qué hacer y qué tiene que pasar. Marcá ✔ o ✘.
 |---|---|---|
 | D1 | Plantilla `{Fecha} {Nombre}`, desde 2 hasta 5 → **Nueva caja** | Una caja con 4 líneas: fecha en Bold y nombre en Light, en la misma línea |
 | D2 | Centrar la caja, cambiar interletra e interlineado, moverla | El texto cambia como cualquier texto |
-| D3 | En la hoja, cambiar "Juan Diaz" por "Juan Pérez" → seleccionar la caja → **Actualizar caja** | Cambia solo ese nombre. Centrado, interletra, interlineado, posición y formato por columna se mantienen |
-| D4 | Ctrl/Cmd+Z una vez | Vuelve a "Juan Diaz", con un solo deshacer |
+| D3 | En la hoja, cambiar "Juan Díaz" por "Juan Torres" → seleccionar la caja → **Actualizar caja** | Cambia solo ese nombre. Centrado, interletra, interlineado, posición y formato por columna se mantienen |
+| D4 | Ctrl/Cmd+Z una vez | Vuelve a "Juan Díaz", con un solo deshacer |
 | D5 | Cambiar Nombre a 30 pt en el panel → Actualizar caja | Todos los nombres pasan a 30 pt |
 | D6 | Rango 2 a 50 | Muestra 4 líneas y avisa "La hoja tiene datos hasta la fila 5…" |
 | D7 | Plantilla `{Fecha} {Edad}` | "La variable {Edad} no existe en la hoja." |

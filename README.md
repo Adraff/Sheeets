@@ -6,8 +6,8 @@ An Adobe Illustrator plugin that creates **native** text boxes whose content com
 
 Example: with a sheet that has `Date` and `Name` columns and the template `{Date} {Name}`, the box shows one line per row, with the date in Bold and the name in Light:
 
-> **March 24** Ana Perez
-> **March 27** Luis Gomez
+> **March 24** Jane Doe
+> **March 27** John Smith
 
 The result is ordinary Illustrator text: justification, tracking, leading, paragraph styles and effects all work as usual, and your adjustments survive updates.
 
@@ -28,23 +28,23 @@ No admin rights and no extra software are needed.
 
 ### Step 1: download
 1. Go to the **[Releases](https://github.com/Adraff/Sheeets/releases/latest)** page.
-2. Under **Assets**, download **`Sheeets-<version>.zip`**. Don't use "Source code": that one is for developers.
+2. Under **Assets**, download **`Sheeets-<version>.zip`**.
 3. Unzip it:
    - Windows: right-click the `.zip` → **Extract All…** → **Extract**.
    - macOS: double-click the `.zip`.
 
 ### Step 2: install on Windows
 1. Close Illustrator.
-2. In the unzipped folder, double-click **`Instalar.bat`** ("Instalar" means "Install").
+2. In the unzipped folder, double-click **`Install.bat`**.
 3. If Windows shows "Windows protected your PC", click **More info → Run anyway**.
-4. A black window shows the progress. When it says **"Listo. Sheeets … quedó instalada."** (done, installed), press Enter to close it.
+4. A black window shows the progress. When it says the installation is done, press Enter to close it.
 
 ### Step 2: install on macOS
 1. Close Illustrator.
-2. In the unzipped folder, **right-click → Open** on **`Instalar.command`** and confirm **Open**. A plain double-click may be blocked because the file isn't signed.
-3. Terminal opens with the progress. When it says **"Listo. Sheeets … quedó instalada."**, press Enter.
+2. In the unzipped folder, **right-click → Open** on **`Install.command`** and confirm **Open**. A plain double-click may be blocked because the file isn't signed.
+3. Terminal opens with the progress. When it says the installation is done, press Enter.
 
-If macOS still refuses: open **Terminal**, type `bash ` (with a space), drag `Instalar.command` into the window and press Enter.
+If macOS still refuses: open **Terminal**, type `bash ` (with a space), drag `Install.command` into the window and press Enter.
 
 ### Step 3: open the panel
 1. Open Illustrator.
@@ -59,7 +59,7 @@ If the panel doesn't show up or is empty, see [Troubleshooting](#troubleshooting
   - macOS: `~/Library/Application Support/Adobe/CEP/extensions/com.sheeets.linkedtext`
 - Sets `PlayerDebugMode = 1` for CSXS 9–13 (Windows registry `HKCU\Software\Adobe\CSXS.<n>` / macOS `defaults` domain `com.adobe.CSXS.<n>`).
 - Backs up a previously installed version before replacing it.
-- Writes a log to `%TEMP%\Sheeets-instalacion.log` (Windows) or `$TMPDIR/Sheeets-instalacion.log` (macOS).
+- Writes a log to `%TEMP%\Sheeets-install.log` (Windows) or `$TMPDIR/Sheeets-install.log` (macOS).
 
 The installer's messages are in Spanish.
 
@@ -128,10 +128,10 @@ If you edit a box's text by hand, the panel marks it "edited by hand" and the ne
 ---
 
 ## Updating the plugin
-Unzip the new version and run `Instalar.bat` / `Instalar.command`. It backs up and replaces the previous version.
+Unzip the new version and run `Install.bat` / `Install.command`. It backs up and replaces the previous version.
 
 ## Uninstall
-Close Illustrator and run **`Desinstalar.bat`** (Windows) or **`Desinstalar.command`** (macOS). It asks whether to turn debug mode off too. Only the values the installer changed are restored.
+Close Illustrator and run **`Uninstall.bat`** (Windows) or **`Uninstall.command`** (macOS). It asks whether to turn debug mode off too. Only the values the installer changed are restored.
 
 Boxes already created stay normal Illustrator text: nothing breaks without the plugin.
 
@@ -199,8 +199,8 @@ Sheeets is free and open-source software under the **[GNU GPL v3](LICENSE)**. ©
 - **Exception: the icons and the logo** (everything in `plugin/img/`) are **not** under the GPL. They are © Adraff, all rights reserved, and may only be used as part of Sheeets, not in any other project. See [LICENSE-ICONS.md](LICENSE-ICONS.md).
 
 ## More documentation (Spanish)
-- [docs/PRUEBAS.md](docs/PRUEBAS.md): manual test guide.
-- [docs/LIMITACIONES.md](docs/LIMITACIONES.md): known limitations and future improvements.
+- [docs/TESTING.md](docs/TESTING.md): manual test guide.
+- [docs/LIMITATIONS.md](docs/LIMITATIONS.md): known limitations and future improvements.
 
 ## For developers
 
@@ -211,9 +211,9 @@ Sheeets is free and open-source software under the **[GNU GPL v3](LICENSE)**. ©
   - `js/sheets.js`: Google Sheets provider (CSV export, file title and tabs).
   - `js/template.js`: template and render spec.
   - `jsx/host.jsx`: ExtendScript.
-- `installer/`: Windows installer scripts (PowerShell); `Instalar.command` / `Desinstalar.command` for macOS.
+- `installer/`: Windows installer scripts (PowerShell); `Install.command` / `Uninstall.command` for macOS.
 - `tests/csv.test.html`: tests for the parser, links, template and texts. To run them, serve the repo with `tests/serve.ps1` and open `http://localhost:8765/tests/csv.test.html`.
-- **Distribution .zip:** `powershell -ExecutionPolicy Bypass -File tools\empaquetar.ps1` builds `dist\Sheeets-<version>.zip`, with the `.command` files executable on macOS.
+- **Distribution .zip:** `powershell -ExecutionPolicy Bypass -File tools\package.ps1` builds `dist\Sheeets-<version>.zip`, with the `.command` files executable on macOS.
 - **Data:**
   - **Each box:** the `lkt_box` Tag of the text object holds its config (link, sheet, formats, template, range) as JSON with `schemaVersion`.
   - **Document:** the XMP (namespace `http://ns.sheeets.local/linkedtext/1.0/`, property `doc`) caches the downloaded rows.

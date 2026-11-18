@@ -6,7 +6,7 @@ DEST="$HOME/Library/Application Support/Adobe/CEP/extensions/$ID"
 DATA="$HOME/Library/Application Support/Sheeets"
 [ ! -d "$DATA" ] && [ -d "$HOME/Library/Application Support/CajaEnlazable" ] && DATA="$HOME/Library/Application Support/CajaEnlazable"   # before the rename
 STATE="$DATA/registry-state.txt"
-LOG="${TMPDIR:-/tmp}/Sheeets-desinstalacion.log"
+LOG="${TMPDIR:-/tmp}/Sheeets-uninstall.log"
 
 log() { echo "$1"; echo "[$(date '+%Y-%m-%dT%H:%M:%S')] $1" >> "$LOG"; }
 finish() { echo; read -r -p "Apretá Enter para cerrar " _; exit "$1"; }
@@ -38,7 +38,7 @@ if [ -f "$STATE" ]; then
         *) log "Se dejó activada la carga de extensiones sin firmar." ;;
     esac
 fi
-rm -rf "$DATA/respaldo"
+rm -rf "$DATA/backup" "$DATA/respaldo"   # "respaldo": name before 0.4.2
 rmdir "$DATA" 2>/dev/null
 
 log "Listo. Sheeets se desinstaló."

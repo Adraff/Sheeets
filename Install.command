@@ -9,7 +9,7 @@ DEST="$HOME/Library/Application Support/Adobe/CEP/extensions/$ID"
 DATA="$HOME/Library/Application Support/Sheeets"
 OLD_DATA="$HOME/Library/Application Support/CajaEnlazable"   # before the rename
 STATE="$DATA/registry-state.txt"
-LOG="${TMPDIR:-/tmp}/Sheeets-instalacion.log"
+LOG="${TMPDIR:-/tmp}/Sheeets-install.log"
 CSXS_VERSIONS="9 10 11 12 13"   # Illustrator 2019 (CSXS 9) .. 2026 (CSXS 12), plus one ahead.
 
 log() { echo "$1"; echo "[$(date '+%Y-%m-%dT%H:%M:%S')] $1" >> "$LOG"; }
@@ -38,9 +38,9 @@ OLD_VER="$(bundle_version "$DEST/CSXS/manifest.xml")"
 mkdir -p "$DATA" || fail "No se pudo crear $DATA"
 if [ -n "$OLD_VER" ]; then
     log "Versión instalada: $OLD_VER  ->  versión nueva: $NEW_VER"
-    rm -rf "$DATA/respaldo"
-    mv "$DEST" "$DATA/respaldo" || fail "No se pudo respaldar la versión anterior."
-    log "Copia de respaldo de la versión anterior en: $DATA/respaldo"
+    rm -rf "$DATA/backup" "$DATA/respaldo"   # "respaldo": name before 0.4.2
+    mv "$DEST" "$DATA/backup" || fail "No se pudo respaldar la versión anterior."
+    log "Copia de respaldo de la versión anterior en: $DATA/backup"
 else
     log "Instalando versión $NEW_VER"
 fi

@@ -43,7 +43,7 @@ eq("tpl no vars", !!parseTemplate("hola", V).error, true);
 var segs = parseTemplate("{Fecha} {Nombre}", V).segments;
 var sp = buildSpec(sheet, segs, function (v) { return v.name; }, 2, 4);
 eq("spec contents", sp.contents, "24 de Marzo Ana Perez\r27 de Marzo Luis" + LINE_BREAK + "Gomez");
-eq("spec runs", sp.runs, [[0, 11, 0], [12, 15, 1], [28, 11, 0], [40, 14, 1]]);
+eq("spec runs", sp.runs, [[0, 11, 0], [12, 9, 1], [22, 11, 0], [34, 10, 1]]);
 eq("spec formats", sp.formats, ["Fecha", "Nombre"]);
 eq("spec probe", sp.probe, 11);
 eq("spec warnings (blank rows are silent)", sp.warnings, []);

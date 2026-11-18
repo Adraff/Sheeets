@@ -8,7 +8,7 @@ $Source   = Join-Path (Split-Path $PSScriptRoot -Parent) "plugin"
 $Dest     = Join-Path $env:APPDATA "Adobe\CEP\extensions\$Id"
 $DataDir  = Join-Path $env:LOCALAPPDATA "Sheeets"
 $State    = Join-Path $DataDir "registry-state.json"
-$LogFile  = Join-Path $env:TEMP "Sheeets-instalacion.log"
+$LogFile  = Join-Path $env:TEMP "Sheeets-install.log"
 $CsxsVersions = 9..13   # Illustrator 2019 (CSXS 9) .. 2026 (CSXS 12), plus one ahead.
 
 function Log($msg, $color = "Gray") {
@@ -44,8 +44,8 @@ try {
     $oldVer = Get-BundleVersion (Join-Path $Dest "CSXS\manifest.xml")
     if ($oldVer) {
         Log "Versión instalada: $oldVer  ->  versión nueva: $newVer"
-        $backup = Join-Path $DataDir "respaldo"
-        if (Test-Path $backup) { Remove-Item $backup -Recurse -Force }
+        $backup = Join-Path $DataDir "backup"
+        foreach ($b in $backup, (Join-Path $DataDir "respaldo")) { if (Test-Path $b) { Remove-Item $b -Recurse -Force } }  # "respaldo": name before 0.4.2
         New-Item -ItemType Directory -Force $DataDir | Out-Null
         Move-Item $Dest $backup   # backup lives outside the CEP folder so Illustrator never loads two copies
         Log "Copia de respaldo de la versión anterior en: $backup"

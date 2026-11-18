@@ -7,7 +7,7 @@ $Id      = "com.sheeets.linkedtext"
 $Dest    = Join-Path $env:APPDATA "Adobe\CEP\extensions\$Id"
 $DataDir = Join-Path $env:LOCALAPPDATA "Sheeets"
 $State   = Join-Path $DataDir "registry-state.json"
-$LogFile = Join-Path $env:TEMP "Sheeets-desinstalacion.log"
+$LogFile = Join-Path $env:TEMP "Sheeets-uninstall.log"
 
 function Log($msg, $color = "Gray") {
     Write-Host $msg -ForegroundColor $color
@@ -46,8 +46,9 @@ try {
             Log "Se dejó activada la carga de extensiones sin firmar."
         }
     }
-    $backup = Join-Path $DataDir "respaldo"
-    if (Test-Path $backup) { Remove-Item $backup -Recurse -Force }
+    foreach ($backup in (Join-Path $DataDir "backup"), (Join-Path $DataDir "respaldo")) {  # "respaldo": name before 0.4.2
+        if (Test-Path $backup) { Remove-Item $backup -Recurse -Force }
+    }
     if ((Test-Path $DataDir) -and -not (Get-ChildItem $DataDir)) { Remove-Item $DataDir -Force }
 
     Log "Listo. Sheeets se desinstaló." "Green"

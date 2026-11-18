@@ -6,8 +6,8 @@ Plugin para Adobe Illustrator que crea cajas de texto **nativas** cuyo contenido
 
 Ejemplo: con una hoja de columnas `Fecha` y `Nombre`, y la plantilla `{Fecha} {Nombre}`, la caja muestra una línea por fila, con la fecha en Bold y el nombre en Light:
 
-> **24 de Marzo** Ana Perez
-> **27 de Marzo** Luis Gomez
+> **24 de Marzo** Ana Pérez
+> **27 de Marzo** Luis Gómez
 
 El resultado es texto común de Illustrator: justificación, interletra, interlineado, estilos de párrafo y efectos funcionan como siempre, y tus ajustes se mantienen al actualizar.
 
@@ -28,23 +28,23 @@ No hace falta instalar nada más ni tener permisos de administrador.
 
 ### Paso 1: descargar
 1. Entrá a la página de **[Releases](https://github.com/Adraff/Sheeets/releases/latest)**.
-2. En **Assets**, descargá **`Sheeets-<versión>.zip`**. No uses "Source code": ese archivo es para desarrolladores.
+2. En **Assets**, descargá **`Sheeets-<versión>.zip`**.
 3. Descomprimilo:
    - Windows: clic derecho sobre el `.zip` → **Extraer todo…** → **Extraer**.
    - macOS: doble clic sobre el `.zip`.
 
 ### Paso 2: instalar en Windows
 1. Cerrá Illustrator.
-2. En la carpeta que descomprimiste, hacé doble clic en **`Instalar.bat`**.
+2. En la carpeta que descomprimiste, hacé doble clic en **`Install.bat`**.
 3. Si aparece "Windows protegió su PC": **Más información → Ejecutar de todas formas**.
 4. Se abre una ventana negra con el avance. Cuando dice **"Listo. Sheeets … quedó instalada."**, apretá Enter para cerrarla.
 
 ### Paso 2: instalar en macOS
 1. Cerrá Illustrator.
-2. En la carpeta que descomprimiste, hacé **clic derecho → Abrir** sobre **`Instalar.command`** y confirmá **Abrir**. Con doble clic, macOS puede bloquearlo porque el archivo no está firmado.
+2. En la carpeta que descomprimiste, hacé **clic derecho → Abrir** sobre **`Install.command`** y confirmá **Abrir**. Con doble clic, macOS puede bloquearlo porque el archivo no está firmado.
 3. Se abre la Terminal con el avance. Cuando dice **"Listo. Sheeets … quedó instalada."**, apretá Enter.
 
-Si macOS sigue sin dejarlo abrir: abrí **Terminal**, escribí `bash ` (con espacio), arrastrá `Instalar.command` a la ventana y apretá Enter.
+Si macOS sigue sin dejarlo abrir: abrí **Terminal**, escribí `bash ` (con espacio), arrastrá `Install.command` a la ventana y apretá Enter.
 
 ### Paso 3: abrir el panel
 1. Abrí Illustrator.
@@ -59,7 +59,7 @@ Si el panel no aparece o aparece vacío, mirá [Solución de problemas](#soluci�
   - macOS: `~/Library/Application Support/Adobe/CEP/extensions/com.sheeets.linkedtext`
 - Activa `PlayerDebugMode = 1` para CSXS 9 a 13 (registro de Windows `HKCU\Software\Adobe\CSXS.<n>` / `defaults` de macOS `com.adobe.CSXS.<n>`).
 - Si ya había una versión instalada, la respalda antes de reemplazarla.
-- Deja un registro de actividad en `%TEMP%\Sheeets-instalacion.log` (Windows) o `$TMPDIR/Sheeets-instalacion.log` (macOS).
+- Deja un registro de actividad en `%TEMP%\Sheeets-install.log` (Windows) o `$TMPDIR/Sheeets-install.log` (macOS).
 
 ### Por qué se activa el "modo de depuración"
 Adobe solo carga extensiones sin firma si `PlayerDebugMode` está activo. Firmar un plugin requiere herramientas de Adobe (`ZXPSignCmd`) que este proyecto no usa. Con el modo activo, Illustrator puede cargar **cualquier** extensión sin firmar que esté en tu cuenta, no solo esta. El desinstalador te ofrece desactivarlo.
@@ -126,10 +126,10 @@ Si cambiás a mano el texto de una caja, el panel lo marca como "editada a mano"
 ---
 
 ## Actualizar el plugin
-Descomprimí la versión nueva y ejecutá `Instalar.bat` / `Instalar.command`. El instalador respalda la versión anterior y la reemplaza.
+Descomprimí la versión nueva y ejecutá `Install.bat` / `Install.command`. El instalador respalda la versión anterior y la reemplaza.
 
 ## Desinstalar
-Cerrá Illustrator y ejecutá **`Desinstalar.bat`** (Windows) o **`Desinstalar.command`** (macOS). Te pregunta si querés desactivar también el modo de depuración. Solo se revierten los valores que cambió el instalador.
+Cerrá Illustrator y ejecutá **`Uninstall.bat`** (Windows) o **`Uninstall.command`** (macOS). Te pregunta si querés desactivar también el modo de depuración. Solo se revierten los valores que cambió el instalador.
 
 Las cajas ya creadas siguen siendo texto normal de Illustrator: no se rompen sin el plugin.
 
@@ -197,8 +197,8 @@ Sheeets es software libre y gratuito, bajo la licencia **[GNU GPL v3](LICENSE)**
 - **Excepción: los íconos y el logo** (todo lo que está en `plugin/img/`) **no** están bajo la GPL. Son © Adraff, todos los derechos reservados, y solo se pueden usar como parte de Sheeets, no en otros proyectos. Ver [LICENSE-ICONS.md](LICENSE-ICONS.md).
 
 ## Más documentación
-- [docs/PRUEBAS.md](docs/PRUEBAS.md): guía de pruebas manuales.
-- [docs/LIMITACIONES.md](docs/LIMITACIONES.md): limitaciones conocidas y mejoras futuras.
+- [docs/TESTING.md](docs/TESTING.md): guía de pruebas manuales.
+- [docs/LIMITATIONS.md](docs/LIMITATIONS.md): limitaciones conocidas y mejoras futuras.
 
 ## Para desarrolladores
 
@@ -209,9 +209,9 @@ Sheeets es software libre y gratuito, bajo la licencia **[GNU GPL v3](LICENSE)**
   - `js/sheets.js`: proveedor de Google Sheets (exportación CSV, título y pestañas).
   - `js/template.js`: plantilla y render.
   - `jsx/host.jsx`: ExtendScript.
-- `installer/`: scripts de instalación de Windows (PowerShell); `Instalar.command` / `Desinstalar.command` para macOS.
+- `installer/`: scripts de instalación de Windows (PowerShell); `Install.command` / `Uninstall.command` para macOS.
 - `tests/csv.test.html`: pruebas del parser, enlaces, plantilla y textos. Para correrlas, servilas con `tests/serve.ps1` y abrí `http://localhost:8765/tests/csv.test.html`.
-- **Crear el .zip de distribución:** `powershell -ExecutionPolicy Bypass -File tools\empaquetar.ps1` genera `dist\Sheeets-<versión>.zip`, con los `.command` ejecutables en macOS.
+- **Crear el .zip de distribución:** `powershell -ExecutionPolicy Bypass -File tools\package.ps1` genera `dist\Sheeets-<versión>.zip`, con los `.command` ejecutables en macOS.
 - **Datos:**
   - **Cada caja:** el Tag `lkt_box` del objeto de texto guarda su configuración (enlace, hoja, formatos, plantilla, rango) en JSON con `schemaVersion`.
   - **Documento:** el XMP (espacio `http://ns.sheeets.local/linkedtext/1.0/`, propiedad `doc`) guarda los datos descargados.
